@@ -58,6 +58,8 @@
 <div id="top-workers"></div></div>
 
 <script>
+(function(){window.fetch=function(url,opts){return new Promise(function(resolve,reject){var xhr=new XMLHttpRequest();xhr.open((opts&&opts.method)||"GET",url,true);if(opts&&opts.headers){Object.keys(opts.headers).forEach(function(k){xhr.setRequestHeader(k,opts.headers[k])})}xhr.onload=function(){resolve({ok:xhr.status>=200&&xhr.status<300,status:xhr.status,json:function(){return Promise.resolve(JSON.parse(xhr.responseText))},text:function(){return Promise.resolve(xhr.responseText)}})};xhr.onerror=function(){reject(new TypeError("Network error"))};xhr.send(opts&&opts.body||null)})}})()
+
 const colors=['#22D3EE','#34D399','#FBBF24','#A855F7','#EF4444','#60A5FA','#F472B6','#FB923C','#14B8A6','#E11D48'];
 const chartDefaults={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#CBD5E1',font:{size:11}}}}};
 

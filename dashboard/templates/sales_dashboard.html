@@ -65,6 +65,8 @@
 <button class="btn btn-primary btn-full" onclick="addLead()">Add Lead</button></div></div></div>
 
 <script>
+(function(){window.fetch=function(url,opts){return new Promise(function(resolve,reject){var xhr=new XMLHttpRequest();xhr.open((opts&&opts.method)||"GET",url,true);if(opts&&opts.headers){Object.keys(opts.headers).forEach(function(k){xhr.setRequestHeader(k,opts.headers[k])})}xhr.onload=function(){resolve({ok:xhr.status>=200&&xhr.status<300,status:xhr.status,json:function(){return Promise.resolve(JSON.parse(xhr.responseText))},text:function(){return Promise.resolve(xhr.responseText)}})};xhr.onerror=function(){reject(new TypeError("Network error"))};xhr.send(opts&&opts.body||null)})}})()
+
 function openModal(id){document.getElementById(id).classList.add('show')}
 function closeModal(id){document.getElementById(id).classList.remove('show')}
 function api(url,data){return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(r=>r.json())}
