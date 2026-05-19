@@ -110,8 +110,61 @@
 
 function saveApiKey(provider){
     const key=document.getElementById('api_key_'+provider).value;
-    fetch('/api/settings/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({provider:provider,api_key:key})})
-    .then(r=>r.json()).then(r=>{alert(r.message||r.error);location.reload()})}
+    const config={};
+    // Collect extra fields per provider
+    if(provider==='smtp'){
+        const f=document.getElementById('smtp_from'); if(f&&f.value) config.smtp_from=f.value;
+    } else if(provider==='twilio'){
+        const s=document.getElementById('twilio_sid'); if(s&&s.value) config.account_sid=s.value;
+        const p=document.getElementById('twilio_phone'); if(p&&p.value) config.phone_number=p.value;
+    } else if(provider==='whatsapp'){
+        const p=document.getElementById('wa_phone_id'); if(p&&p.value) config.phone_number_id=p.value;
+    } else if(provider==='slack'){
+        const c=document.getElementById('slack_channel'); if(c&&c.value) config.channel=c.value;
+    } else if(provider==='stripe'){
+        const p=document.getElementById('stripe_pub'); if(p&&p.value) config.publishable_key=p.value;
+        const w=document.getElementById('stripe_webhook'); if(w&&w.value) config.webhook_secret=w.value;
+    } else if(provider==='google_search_console'){
+        const c=document.getElementById('gsc_client_id'); if(c&&c.value) config.client_id=c.value;
+        const s=document.getElementById('gsc_client_secret'); if(s&&s.value) config.client_secret=s.value;
+        const pr=document.getElementById('gsc_property'); if(pr&&pr.value) config.property_url=pr.value;
+    }
+    const payload={provider:provider,api_key:key};
+    if(Object.keys(config).length>0) payload.config_json=JSON.stringify(config);
+    fetch('/api/settings/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    .then(r=>r.json()).then(r=>{
+        const badge=document.querySelector('#api_key_'+provider).closest('.setting-card').querySelector('.badge');
+        if(key){badge.className='badge badge-active';badge.textContent='Active';}
+        else{badge.className='badge badge-pending';badge.textContent='Not Configured';}
+        alert('✅ '+provider.toUpperCase()+' — '+(r.message||r.error));
+    }).catch(e=>alert('❌ Error: '+e.message))}
+
+// Populate extra config fields on page load
+(function(){
+    const settings = {{ api_settings | tojson }};
+    settings.forEach(function(s){
+        if(!s.config_json) return;
+        try{
+            const cfg = JSON.parse(s.config_json);
+            if(s.provider==='smtp' && cfg.smtp_from){const e=document.getElementById('smtp_from');if(e)e.value=cfg.smtp_from;}
+            if(s.provider==='twilio'){
+                if(cfg.account_sid){const e=document.getElementById('twilio_sid');if(e)e.value=cfg.account_sid;}
+                if(cfg.phone_number){const e=document.getElementById('twilio_phone');if(e)e.value=cfg.phone_number;}
+            }
+            if(s.provider==='whatsapp' && cfg.phone_number_id){const e=document.getElementById('wa_phone_id');if(e)e.value=cfg.phone_number_id;}
+            if(s.provider==='slack' && cfg.channel){const e=document.getElementById('slack_channel');if(e)e.value=cfg.channel;}
+            if(s.provider==='stripe'){
+                if(cfg.publishable_key){const e=document.getElementById('stripe_pub');if(e)e.value=cfg.publishable_key;}
+                if(cfg.webhook_secret){const e=document.getElementById('stripe_webhook');if(e)e.value=cfg.webhook_secret;}
+            }
+            if(s.provider==='google_search_console'){
+                if(cfg.client_id){const e=document.getElementById('gsc_client_id');if(e)e.value=cfg.client_id;}
+                if(cfg.client_secret){const e=document.getElementById('gsc_client_secret');if(e)e.value=cfg.client_secret;}
+                if(cfg.property_url){const e=document.getElementById('gsc_property');if(e)e.value=cfg.property_url;}
+            }
+        }catch(e){}
+    });
+})();
 
 function checkAllStatus(){
     fetch('/api/integrations/status').then(r=>r.json()).then(data=>{
