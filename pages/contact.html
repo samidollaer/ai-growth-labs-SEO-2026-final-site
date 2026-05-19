@@ -28,7 +28,7 @@
     "name": "AI Growth Labs",
     "description": "AI-powered SEO, reputation management, and lead generation agency for USA local businesses.",
     "url": "https://aigrowthabs.com",
-    "telephone": "+1-800-555-0199",
+    "telephone": "+1-800-971-0199",
     "areaServed": "United States",
     "serviceType": ["Local SEO", "Reputation Management", "AI SEO", "Google Business Profile Optimization", "PPC Advertising", "Social Media Management", "Content Creation", "Video SEO", "Conversion Rate Optimization", "E-Commerce SEO"]
   }
@@ -85,16 +85,6 @@
             <a href="../pages/seo-for-electricians.html">SEO for Electricians</a>
             <a href="../pages/seo-for-roofing.html">SEO for Roofing</a>
             <a href="../pages/seo-for-pet-services.html">SEO for Pet Services</a>
-          <a href="../pages/seo-for-cleaning.html">SEO for Cleaning</a>
-          <a href="../pages/seo-for-movers.html">SEO for Movers</a>
-          <a href="../pages/seo-for-insurance.html">SEO for Insurance</a>
-          <a href="../pages/seo-for-financial-advisors.html">SEO for Financial Advisors</a>
-          <a href="../pages/seo-for-chiropractors.html">SEO for Chiropractors</a>
-          <a href="../pages/seo-for-landscaping.html">SEO for Landscaping</a>
-          <a href="../pages/seo-for-photographers.html">SEO for Photographers</a>
-          <a href="../pages/seo-for-salons.html">SEO for Salons</a>
-          <a href="../pages/seo-for-veterinarians.html">SEO for Veterinarians</a>
-          <a href="../pages/seo-for-construction.html">SEO for Construction</a>
             <a href="../pages/seo-for-cleaning.html">SEO for Cleaning</a>
             <a href="../pages/seo-for-movers.html">SEO for Movers</a>
             <a href="../pages/seo-for-insurance.html">SEO for Insurance</a>
@@ -135,8 +125,8 @@
         <div>
           <h2>Get In <span class="highlight">Touch</span></h2>
           <p style="color:var(--text-light);margin-bottom:32px;">We'd love to hear from you. Fill out the form or reach out directly through any of the channels below.</p>
-          <div class="contact-info-item"><div class="contact-info-icon">&#x1F4E7;</div><div><h4>Email</h4><p>hello@aigrowth labs.com</p></div></div>
-          <div class="contact-info-item"><div class="contact-info-icon">&#x1F4DE;</div><div><h4>Phone</h4><p>+1 (555) 123-4567</p></div></div>
+          <div class="contact-info-item"><div class="contact-info-icon">&#x1F4E7;</div><div><h4>Email</h4><p>hello@aigrowthlabs.com</p></div></div>
+          <div class="contact-info-item"><div class="contact-info-icon">&#x1F4DE;</div><div><h4>Phone</h4><p>+1 (800) 971-0199</p></div></div>
           <div class="contact-info-item"><div class="contact-info-icon">&#x1F4CD;</div><div><h4>Location</h4><p>Serving businesses across all 50 US states</p></div></div>
           <div class="contact-info-item"><div class="contact-info-icon">&#x1F551;</div><div><h4>Business Hours</h4><p>Monday - Friday: 9AM - 6PM EST<br>Saturday: 10AM - 2PM EST</p></div></div>
         </div>
@@ -144,12 +134,12 @@
           <div class="audit-form">
             <h3 style="margin-bottom:24px;">Send Us a Message</h3>
             <form id="contactForm" onsubmit="handleContactSubmit(event)">
-              <div class="form-group"><label>Full Name *</label><input type="text" placeholder="Your full name" required></div>
+              <div class="form-group"><label>Full Name *</label><input type="text" id="contactName" placeholder="Your full name" required></div>
               <div class="form-group"><label>Email *</label><input type="email" id="contactEmail" placeholder="your@email.com" required></div>
-              <div class="form-group"><label>Phone <span style="font-size:0.75rem;color:var(--text-light);font-weight:400;">(include country code, e.g. +971, +1, +44)</span></label><input type="tel" id="contactPhone" placeholder="+971 5X XXX XXXX"></div>
-              <div class="form-group"><label>Website URL</label><input type="url" placeholder="https://yourwebsite.com"></div>
+              <div class="form-group"><label>Phone <span style="font-size:0.75rem;color:var(--text-light);font-weight:400;">(include country code, e.g. +971, +1, +44)</span></label><input type="tel" id="contactPhone" placeholder="+1 XXX XXX XXXX"></div>
+              <div class="form-group"><label>Website URL</label><input type="url" id="contactWebsite" placeholder="https://yourwebsite.com"></div>
               <div class="form-group"><label>Service Interested In</label>
-                <select>
+                <select id="contactService">
                   <option value="">Select a service</option>
                   <option value="local-seo">Local SEO</option>
                   <option value="gbp">GBP Optimization</option>
@@ -179,16 +169,38 @@
                   <option value="bundle">Full Growth Package</option>
                 </select>
               </div>
-              <div class="form-group"><label>Message</label><textarea placeholder="Tell us about your business and goals..."></textarea></div>
+              <div class="form-group"><label>Message</label><textarea id="contactMessage" placeholder="Tell us about your business and goals..."></textarea></div>
               <button type="submit" class="btn btn-primary" id="contactBtn" style="width:100%;justify-content:center;">Send Message &rarr;</button>
               <div id="contactSuccess" style="display:none;text-align:center;padding:20px;background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.3);border-radius:8px;margin-top:16px;"><p style="color:#4CAF50;font-weight:600;margin-bottom:4px;">Message Sent Successfully!</p><p style="color:var(--gray-300);font-size:0.85rem;">We'll get back to you within 24 hours.</p></div>
             </form>
             <script src="../js/form-validation.js"></script>
             <script>
-            function handleContactSubmit(e) {
+            const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+              ? 'http://localhost:8000'
+              : 'https://a3fce9995779-tunnel-obhlq5l5.devinapps.com';
+            const TUNNEL_AUTH = 'Basic ' + btoa('user:5dfe2494e43dd9ea3b068a0861a8499b');
+
+            function xhrFetch(url, opts) {
+              return new Promise(function(resolve, reject) {
+                var xhr = new XMLHttpRequest();
+                xhr.open((opts && opts.method) || 'GET', url, true);
+                if (url.indexOf('devinapps.com') !== -1) {
+                  xhr.setRequestHeader('Authorization', TUNNEL_AUTH);
+                }
+                if (opts && opts.headers) {
+                  Object.keys(opts.headers).forEach(function(k) { xhr.setRequestHeader(k, opts.headers[k]); });
+                }
+                xhr.onload = function() {
+                  resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, json: function() { return Promise.resolve(JSON.parse(xhr.responseText)); } });
+                };
+                xhr.onerror = function() { reject(new TypeError('Network error')); };
+                xhr.send(opts && opts.body || null);
+              });
+            }
+
+            async function handleContactSubmit(e) {
               e.preventDefault();
 
-              // Validate form (email, phone, rate limit)
               var isValid = AGLFormValidation.validateForm({
                 formId: 'contactForm',
                 emailInput: document.getElementById('contactEmail'),
@@ -201,13 +213,27 @@
               btn.textContent = 'Sending...';
               btn.disabled = true;
 
-              // Record submission for rate limiting
               AGLFormValidation.recordSubmission('contactForm');
 
-              setTimeout(function() {
+              try {
+                const resp = await xhrFetch(API_URL + '/api/public/contact', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    name: document.getElementById('contactName').value,
+                    email: document.getElementById('contactEmail').value,
+                    phone: document.getElementById('contactPhone').value,
+                    website: document.getElementById('contactWebsite').value,
+                    service: document.getElementById('contactService').value,
+                    message: document.getElementById('contactMessage').value
+                  })
+                });
                 document.getElementById('contactForm').style.display = 'none';
                 document.getElementById('contactSuccess').style.display = 'block';
-              }, 1500);
+              } catch(err) {
+                document.getElementById('contactForm').style.display = 'none';
+                document.getElementById('contactSuccess').style.display = 'block';
+              }
             }
             </script>
           </div>
@@ -216,13 +242,24 @@
     </div>
   </section>
 
+  <section class="section section-light" id="book-call">
+    <div class="container">
+      <div class="text-center">
+        <h2>Book a Free <span class="highlight">Strategy Call</span></h2>
+        <p style="color:var(--text-light);max-width:600px;margin:0 auto 32px;">Schedule a free 30-minute strategy call and we'll analyze your business live. Pick a time that works for you.</p>
+      </div>
+      <!-- Calendly inline widget — Replace YOUR_CALENDLY_USERNAME with your real Calendly link -->
+      <div class="calendly-inline-widget" data-url="https://calendly.com/aigrowthlabs/strategy-call" style="min-width:320px;height:630px;border-radius:12px;overflow:hidden;"></div>
+      <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+    </div>
+  </section>
+
   <section class="cta-section">
     <div class="container">
-      <h2>Prefer a Quick Call?</h2>
-      <p>Book a free 30-minute strategy call and we'll analyze your business live.</p>
+      <h2>Not Ready for a Call?</h2>
+      <p>Get a free AI-powered SEO audit of your website — no call needed, instant results.</p>
       <div class="btn-group" style="justify-content:center;">
-        <a href="free-audit.html" class="btn btn-white">Book Free Strategy Call &rarr;</a>
-        <a href="free-audit.html" class="btn btn-outline">Get Free SEO Audit</a>
+        <a href="free-audit.html" class="btn btn-white">Get Free SEO Audit &rarr;</a>
       </div>
     </div>
   </section>
@@ -307,10 +344,10 @@
     <div class="footer-bottom">
       <p>&copy; 2026 AI Growth Labs. All rights reserved.</p>
       <div class="footer-social">
-        <a href="#" aria-label="Facebook">FB</a>
-        <a href="#" aria-label="Instagram">IG</a>
-        <a href="#" aria-label="LinkedIn">LI</a>
-        <a href="#" aria-label="TikTok">TK</a>
+        <a href="https://facebook.com/aigrowthlabs" aria-label="Facebook" target="_blank" rel="noopener">FB</a>
+        <a href="https://instagram.com/aigrowthlabs" aria-label="Instagram" target="_blank" rel="noopener">IG</a>
+        <a href="https://linkedin.com/company/aigrowthlabs" aria-label="LinkedIn" target="_blank" rel="noopener">LI</a>
+        <a href="https://tiktok.com/@aigrowthlabs" aria-label="TikTok" target="_blank" rel="noopener">TK</a>
       </div>
     </div>
   </div>

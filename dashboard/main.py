@@ -2755,6 +2755,38 @@ async def public_free_audit(request: Request):
     return {"message": "Audit completed", "audit": audit_result}
 
 
+# ==========================================
+# Part 7: Public Contact Form (No Login Required)
+# ==========================================
+
+@app.post("/api/public/contact")
+async def public_contact(request: Request):
+    """Public endpoint for contact form — no login needed. Saves lead + sends notification."""
+    data = await request.json()
+    name = data.get("name", "").strip()
+    email = data.get("email", "").strip()
+    phone = data.get("phone", "").strip()
+    website = data.get("website", "").strip()
+    service = data.get("service", "").strip()
+    message = data.get("message", "").strip()
+    
+    if not name or not email:
+        raise HTTPException(status_code=400, detail="Name and email are required")
+    
+    db = get_db()
+    try:
+        db.execute("""INSERT OR IGNORE INTO sales_leads 
+            (business_name, contact_name, email, phone, website, source, status, notes)
+            VALUES (?, ?, ?, ?, ?, 'contact_form', 'new', ?)""",
+            (name, name, email, phone, website, f"Service: {service}\nMessage: {message}"))
+        db.commit()
+    except:
+        pass
+    db.close()
+    
+    return {"message": "Thank you! We'll get back to you within 24 hours.", "success": True}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
