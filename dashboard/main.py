@@ -2597,7 +2597,7 @@ def _real_crawl_audit(url, business_name, industry, city):
     import re, ssl, socket
 
     results = {"crawled": True, "url": url}
-    headers = {"User-Agent": "AIGrowthLabs-AuditBot/1.0 (+https://aigrowthabs.com)"}
+    headers = {"User-Agent": "AIGrowthLabs-AuditBot/1.0 (+https://ai-growth-labs-new-gpehlojv.devinapps.com)"}
 
     # ---- Fetch homepage ----
     try:

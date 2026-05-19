@@ -97,6 +97,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, { threshold: 0.1 });
     counterObserver.observe(counterSection);
+    // Fallback: ensure counters animate after 3 seconds if still not triggered
+    setTimeout(() => { animateCounters(); }, 3000);
+    // Also trigger on scroll
+    window.addEventListener('scroll', function scrollCheck() {
+      const r = counterSection.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) {
+        animateCounters();
+        window.removeEventListener('scroll', scrollCheck);
+      }
+    });
   }
 
   // Form validation (skip forms with custom onsubmit handlers)

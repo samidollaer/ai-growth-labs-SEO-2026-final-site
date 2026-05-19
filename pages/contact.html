@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact Us | AI Growth Labs - Get Your Free Strategy Call</title>
   <meta name="keywords" content="contact ai growth labs, free seo consultation, local seo agency contact, seo strategy call">
-  <link rel="canonical" href="https://aigrowthabs.com/pages/contact.html">
-  <link rel="alternate" hreflang="en-us" href="https://aigrowthabs.com/pages/contact.html" />
+  <link rel="canonical" href="https://ai-growth-labs-new-gpehlojv.devinapps.com/pages/contact.html">
+  <link rel="alternate" hreflang="en-us" href="https://ai-growth-labs-new-gpehlojv.devinapps.com/pages/contact.html" />
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://aigrowthabs.com/pages/contact.html">
-  <meta property="og:image" content="https://aigrowthabs.com/assets/images/og-default.jpg">
+  <meta property="og:url" content="https://ai-growth-labs-new-gpehlojv.devinapps.com/pages/contact.html">
+  <meta property="og:image" content="https://ai-growth-labs-new-gpehlojv.devinapps.com/assets/images/og-default.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://aigrowthabs.com/assets/images/og-default.jpg">
+  <meta name="twitter:image" content="https://ai-growth-labs-new-gpehlojv.devinapps.com/assets/images/og-default.jpg">
   <meta property="og:description" content="Contact AI Growth Labs for a free SEO strategy call. We help USA local businesses grow with AI-powered SEO and reputation management.">
   <meta property="og:title" content="Contact Us | AI Growth Labs - Get Your Free Strategy Call">
   <meta name="description" content="Contact AI Growth Labs for a free SEO strategy call. We help USA local businesses grow with AI-powered SEO and reputation management.">
@@ -27,7 +27,7 @@
     "@type": "LocalBusiness",
     "name": "AI Growth Labs",
     "description": "AI-powered SEO, reputation management, and lead generation agency for USA local businesses.",
-    "url": "https://aigrowthabs.com",
+    "url": "https://ai-growth-labs-new-gpehlojv.devinapps.com",
     "telephone": "+1-800-971-0199",
     "areaServed": "United States",
     "serviceType": ["Local SEO", "Reputation Management", "AI SEO", "Google Business Profile Optimization", "PPC Advertising", "Social Media Management", "Content Creation", "Video SEO", "Conversion Rate Optimization", "E-Commerce SEO"]
@@ -133,13 +133,18 @@
         <div>
           <div class="audit-form">
             <h3 style="margin-bottom:24px;">Send Us a Message</h3>
-            <form id="contactForm" onsubmit="handleContactSubmit(event)">
-              <div class="form-group"><label>Full Name *</label><input type="text" id="contactName" placeholder="Your full name" required></div>
-              <div class="form-group"><label>Email *</label><input type="email" id="contactEmail" placeholder="your@email.com" required></div>
-              <div class="form-group"><label>Phone <span style="font-size:0.75rem;color:var(--text-light);font-weight:400;">(include country code, e.g. +971, +1, +44)</span></label><input type="tel" id="contactPhone" placeholder="+1 XXX XXX XXXX"></div>
-              <div class="form-group"><label>Website URL</label><input type="url" id="contactWebsite" placeholder="https://yourwebsite.com"></div>
+            <!-- FormSubmit.co fallback + Backend API dual submission -->
+            <form id="contactForm" onsubmit="handleContactSubmit(event)" action="https://formsubmit.co/hello@aigrowthlabs.com" method="POST">
+              <input type="hidden" name="_subject" value="New Contact Form Submission - AI Growth Labs">
+              <input type="hidden" name="_captcha" value="false">
+              <input type="hidden" name="_template" value="table">
+              <input type="hidden" name="_next" value="https://ai-growth-labs-new-gpehlojv.devinapps.com/pages/contact.html?submitted=true">
+              <div class="form-group"><label>Full Name *</label><input type="text" id="contactName" name="name" placeholder="Your full name" required></div>
+              <div class="form-group"><label>Email *</label><input type="email" id="contactEmail" name="email" placeholder="your@email.com" required></div>
+              <div class="form-group"><label>Phone <span style="font-size:0.75rem;color:var(--text-light);font-weight:400;">(include country code, e.g. +971, +1, +44)</span></label><input type="tel" id="contactPhone" name="phone" placeholder="+1 XXX XXX XXXX"></div>
+              <div class="form-group"><label>Website URL</label><input type="url" id="contactWebsite" name="website" placeholder="https://yourwebsite.com"></div>
               <div class="form-group"><label>Service Interested In</label>
-                <select id="contactService">
+                <select id="contactService" name="service">
                   <option value="">Select a service</option>
                   <option value="local-seo">Local SEO</option>
                   <option value="gbp">GBP Optimization</option>
@@ -169,7 +174,7 @@
                   <option value="bundle">Full Growth Package</option>
                 </select>
               </div>
-              <div class="form-group"><label>Message</label><textarea id="contactMessage" placeholder="Tell us about your business and goals..."></textarea></div>
+              <div class="form-group"><label>Message</label><textarea id="contactMessage" name="message" placeholder="Tell us about your business and goals..."></textarea></div>
               <button type="submit" class="btn btn-primary" id="contactBtn" style="width:100%;justify-content:center;">Send Message &rarr;</button>
               <div id="contactSuccess" style="display:none;text-align:center;padding:20px;background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.3);border-radius:8px;margin-top:16px;"><p style="color:#4CAF50;font-weight:600;margin-bottom:4px;">Message Sent Successfully!</p><p style="color:var(--gray-300);font-size:0.85rem;">We'll get back to you within 24 hours.</p></div>
             </form>
@@ -231,6 +236,22 @@
                 document.getElementById('contactForm').style.display = 'none';
                 document.getElementById('contactSuccess').style.display = 'block';
               } catch(err) {
+                // Backend failed — submit via FormSubmit.co as fallback
+                try {
+                  await fetch('https://formsubmit.co/ajax/hello@aigrowthlabs.com', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                      name: document.getElementById('contactName').value,
+                      email: document.getElementById('contactEmail').value,
+                      phone: document.getElementById('contactPhone').value,
+                      website: document.getElementById('contactWebsite').value,
+                      service: document.getElementById('contactService').value,
+                      message: document.getElementById('contactMessage').value,
+                      _subject: 'New Contact Form - AI Growth Labs'
+                    })
+                  });
+                } catch(e2) { /* silent */ }
                 document.getElementById('contactForm').style.display = 'none';
                 document.getElementById('contactSuccess').style.display = 'block';
               }
