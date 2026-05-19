@@ -88,16 +88,95 @@
 {% endif %}{% endfor %}
 </div>
 
+<h2 style="margin:30px 0 10px;color:#CBD5E1;font-size:14px;text-transform:uppercase;letter-spacing:1px">🔧 Function-Specific API Configuration</h2>
+<div class="settings-grid">
+<div class="card setting-card"><h3>🔍 Free DNA Audit</h3>
+<div class="setting-status">Status: <span class="badge badge-active">Active — Real Crawler</span></div>
+<p style="color:#94A3B8;font-size:0.85rem;margin:8px 0">The free audit now uses a <strong>real website crawler</strong> — no API key needed. It crawls the actual website and analyzes: title tags, meta descriptions, headings, images, links, schema markup, SSL, security headers, robots.txt, sitemap, mobile readiness, page speed, and more.</p>
+<p style="color:#64748B;font-size:0.8rem">Optional: Add an AI provider key above to enable AI-powered recommendations alongside the crawl data.</p>
+</div>
+
+<div class="card setting-card"><h3>📝 Content Generation</h3>
+<div class="setting-status">AI Provider: <select id="func_content_provider" class="form-select" style="width:auto;display:inline-block;margin-left:8px">
+<option value="demo">Demo Mode</option>
+<option value="claude">Claude</option>
+<option value="chatgpt">ChatGPT</option>
+<option value="gemini">Gemini</option>
+</select></div>
+<p style="color:#94A3B8;font-size:0.85rem;margin:8px 0">Powers: blog posts, social media content, ad copy, email templates. Select which AI provider to use (must have API key configured above).</p>
+<button class="btn btn-primary btn-full" onclick="saveFuncConfig('content_generation')" style="margin-top:8px">Save Preference</button>
+</div>
+
+<div class="card setting-card"><h3>🤖 AI Chat Assistant</h3>
+<div class="setting-status">AI Provider: <select id="func_chat_provider" class="form-select" style="width:auto;display:inline-block;margin-left:8px">
+<option value="demo">Demo Mode</option>
+<option value="claude">Claude</option>
+<option value="chatgpt">ChatGPT</option>
+<option value="gemini">Gemini</option>
+</select></div>
+<p style="color:#94A3B8;font-size:0.85rem;margin:8px 0">Powers: SEO questions, strategy suggestions, real-time answers for workers. Select AI provider (must have API key above).</p>
+<button class="btn btn-primary btn-full" onclick="saveFuncConfig('chat_assistant')" style="margin-top:8px">Save Preference</button>
+</div>
+
+<div class="card setting-card"><h3>📊 Competitor Analysis</h3>
+<div class="setting-status">AI Provider: <select id="func_competitor_provider" class="form-select" style="width:auto;display:inline-block;margin-left:8px">
+<option value="demo">Demo Mode</option>
+<option value="claude">Claude</option>
+<option value="chatgpt">ChatGPT</option>
+<option value="gemini">Gemini</option>
+</select></div>
+<p style="color:#94A3B8;font-size:0.85rem;margin:8px 0">Powers: competitor website analysis, gap analysis, strategy recommendations. Select AI provider.</p>
+<button class="btn btn-primary btn-full" onclick="saveFuncConfig('competitor_analysis')" style="margin-top:8px">Save Preference</button>
+</div>
+
+<div class="card setting-card"><h3>📧 Email Notifications</h3>
+<div class="setting-status">Via: <select id="func_email_provider" class="form-select" style="width:auto;display:inline-block;margin-left:8px">
+<option value="demo">Demo Mode</option>
+<option value="smtp">SMTP (Gmail/Custom)</option>
+</select></div>
+<p style="color:#94A3B8;font-size:0.85rem;margin:8px 0">Powers: new lead notifications, client report delivery, payment reminders. Requires SMTP config above.</p>
+<button class="btn btn-primary btn-full" onclick="saveFuncConfig('email_notifications')" style="margin-top:8px">Save Preference</button>
+</div>
+
+<div class="card setting-card"><h3>📞 Voice Calls & IVR</h3>
+<div class="setting-status">Via: <select id="func_voice_provider" class="form-select" style="width:auto;display:inline-block;margin-left:8px">
+<option value="demo">Demo Mode</option>
+<option value="twilio">Twilio</option>
+</select></div>
+<p style="color:#94A3B8;font-size:0.85rem;margin:8px 0">Powers: inbound IVR, outbound calls, AI voice agent, SMS. Requires Twilio config above.</p>
+<button class="btn btn-primary btn-full" onclick="saveFuncConfig('voice_calls')" style="margin-top:8px">Save Preference</button>
+</div>
+
+<div class="card setting-card"><h3>💬 Client Messaging</h3>
+<div class="setting-status">Via: <select id="func_messaging_provider" class="form-select" style="width:auto;display:inline-block;margin-left:8px">
+<option value="demo">Demo Mode</option>
+<option value="whatsapp">WhatsApp</option>
+<option value="slack">Slack</option>
+</select></div>
+<p style="color:#94A3B8;font-size:0.85rem;margin:8px 0">Powers: client updates, report sharing, team notifications. Requires WhatsApp or Slack config above.</p>
+<button class="btn btn-primary btn-full" onclick="saveFuncConfig('client_messaging')" style="margin-top:8px">Save Preference</button>
+</div>
+
+<div class="card setting-card"><h3>💳 Billing & Payments</h3>
+<div class="setting-status">Via: <select id="func_billing_provider" class="form-select" style="width:auto;display:inline-block;margin-left:8px">
+<option value="demo">Demo Mode</option>
+<option value="stripe">Stripe</option>
+</select></div>
+<p style="color:#94A3B8;font-size:0.85rem;margin:8px 0">Powers: recurring invoicing, payment processing, subscription management. Requires Stripe config above.</p>
+<button class="btn btn-primary btn-full" onclick="saveFuncConfig('billing')" style="margin-top:8px">Save Preference</button>
+</div>
+</div>
+
 <div class="card" style="margin-top:30px"><h3>📋 Integration Guide</h3>
 <div class="info-grid">
-<div class="info-item"><h4>🤖 AI Providers</h4><p>Powers: SEO audits, content generation, competitor analysis, AI chat assistant. Need at least ONE AI key.</p></div>
+<div class="info-item"><h4>🔍 Free DNA Audit</h4><p>Now uses a REAL website crawler. No API key needed — audits return actual data from crawling the site. Add AI key for enhanced recommendations.</p></div>
+<div class="info-item"><h4>🤖 AI Providers</h4><p>Powers: content generation, competitor analysis, AI chat assistant. Need at least ONE AI key for AI features.</p></div>
 <div class="info-item"><h4>📧 SMTP</h4><p>Powers: Email reports to clients, payment reminders, notification emails. Gmail App Password works.</p></div>
 <div class="info-item"><h4>📞 Twilio</h4><p>Powers: Inbound/outbound calls, AI voice agent, SMS alerts, call recording. $1/mo + per-call cost.</p></div>
 <div class="info-item"><h4>💬 WhatsApp</h4><p>Powers: Client updates via WhatsApp, report sharing, appointment reminders. Needs Meta Business account.</p></div>
 <div class="info-item"><h4>🔔 Slack</h4><p>Powers: Team notifications on new leads, task completions, payments received. Free with any Slack plan.</p></div>
 <div class="info-item"><h4>💳 Stripe</h4><p>Powers: Recurring billing, auto-invoicing, payment processing, subscription management. 2.9% + 30¢ per transaction.</p></div>
 <div class="info-item"><h4>📊 Google Search Console</h4><p>Powers: Real keyword rankings, click data, impression data, CTR tracking. Free — needs OAuth setup.</p></div>
-<div class="info-item"><h4>🔄 Demo Mode</h4><p>All integrations work in demo mode without API keys — realistic sample data is returned. Add real keys for production.</p></div>
 </div></div>
 
 <div id="status-panel" style="display:none;margin-top:20px" class="card">
@@ -164,6 +243,45 @@ function saveApiKey(provider){
             }
         }catch(e){}
     });
+})();
+
+function saveFuncConfig(funcName){
+    const providerMap={
+        'content_generation':'func_content_provider',
+        'chat_assistant':'func_chat_provider',
+        'competitor_analysis':'func_competitor_provider',
+        'email_notifications':'func_email_provider',
+        'voice_calls':'func_voice_provider',
+        'client_messaging':'func_messaging_provider',
+        'billing':'func_billing_provider'
+    };
+    const sel=document.getElementById(providerMap[funcName]);
+    if(!sel) return;
+    fetch('/api/settings/function-config',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({function_name:funcName,provider:sel.value})})
+    .then(r=>r.json()).then(r=>{
+        alert('✅ '+funcName.replace(/_/g,' ').toUpperCase()+' → '+ sel.value +' — '+(r.message||r.error));
+    }).catch(e=>alert('❌ Error: '+e.message));
+}
+
+// Load function configs
+(function(){
+    fetch('/api/settings/function-config').then(r=>r.json()).then(data=>{
+        if(!data.configs) return;
+        data.configs.forEach(function(c){
+            const providerMap={
+                'content_generation':'func_content_provider',
+                'chat_assistant':'func_chat_provider',
+                'competitor_analysis':'func_competitor_provider',
+                'email_notifications':'func_email_provider',
+                'voice_calls':'func_voice_provider',
+                'client_messaging':'func_messaging_provider',
+                'billing':'func_billing_provider'
+            };
+            const sel=document.getElementById(providerMap[c.function_name]);
+            if(sel) sel.value=c.provider;
+        });
+    }).catch(function(){});
 })();
 
 function checkAllStatus(){

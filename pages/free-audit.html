@@ -528,8 +528,9 @@
         document.getElementById('score-grade').textContent = 'Grade ' + audit.grade;
 
         // Title & meta
-        document.getElementById('result-title').textContent = '📊 DNA Audit Results: ' + audit.business_name;
-        document.getElementById('result-meta').textContent = audit.website + ' | ' + audit.audit_date;
+        var modeLabel = audit.mode === 'live_crawl' ? '🔍 REAL CRAWL' : (audit.mode === 'error' ? '❌ ERROR' : '📊 DNA Audit');
+        document.getElementById('result-title').textContent = modeLabel + ' Results: ' + audit.business_name;
+        document.getElementById('result-meta').textContent = audit.website + ' | ' + audit.audit_date + (audit.mode === 'live_crawl' ? ' | LIVE DATA' : '');
 
         // DNA Pillar Grid
         const pillarGrid = document.getElementById('dna-pillar-grid');

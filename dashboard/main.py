@@ -695,6 +695,34 @@ async def update_api_setting(request: Request):
     db.close()
     return {"message": f"{data['provider']} settings updated"}
 
+# Function-specific API Config
+@app.post("/api/settings/function-config")
+async def save_function_config(request: Request):
+    user = require_role(request, ["super_admin"])
+    data = await request.json()
+    func_name = data.get("function_name", "")
+    provider = data.get("provider", "demo")
+    db = get_db()
+    # Create table if not exists
+    db.execute("""CREATE TABLE IF NOT EXISTS function_configs 
+                  (function_name TEXT PRIMARY KEY, provider TEXT, updated_by INTEGER, updated_at TEXT)""")
+    db.execute("""INSERT OR REPLACE INTO function_configs (function_name, provider, updated_by, updated_at)
+                  VALUES (?, ?, ?, datetime('now'))""", (func_name, provider, user["id"]))
+    db.commit()
+    db.close()
+    return {"message": f"{func_name} now uses {provider}"}
+
+@app.get("/api/settings/function-config")
+async def get_function_configs(request: Request):
+    user = require_role(request, ["super_admin"])
+    db = get_db()
+    try:
+        configs = [dict(r) for r in db.execute("SELECT * FROM function_configs").fetchall()]
+    except:
+        configs = []
+    db.close()
+    return {"configs": configs}
+
 # Suggestions
 @app.post("/api/suggestions")
 async def create_suggestion(request: Request):
@@ -2554,12 +2582,381 @@ async def integration_status(request: Request):
 
 
 # ==========================================
-# Part 6: Public Free Audit (No Login Required)
+# Part 6: Public Free Audit (No Login Required) — REAL CRAWL
 # ==========================================
+
+def _real_crawl_audit(url, business_name, industry, city):
+    """Actually crawl the website and return real analysis data."""
+    import requests as req
+    from bs4 import BeautifulSoup
+    from urllib.parse import urljoin, urlparse
+    import re, ssl, socket
+
+    results = {"crawled": True, "url": url}
+    headers = {"User-Agent": "AIGrowthLabs-AuditBot/1.0 (+https://aigrowthabs.com)"}
+
+    # ---- Fetch homepage ----
+    try:
+        t0 = time.time()
+        resp = req.get(url, headers=headers, timeout=15, allow_redirects=True)
+        load_time = round(time.time() - t0, 2)
+        results["status_code"] = resp.status_code
+        results["load_time"] = load_time
+        results["final_url"] = resp.url
+        results["content_length"] = len(resp.content)
+        html = resp.text
+    except Exception as e:
+        results["error"] = str(e)
+        return results
+
+    soup = BeautifulSoup(html, "lxml")
+
+    # ---- TITLE TAG ----
+    title_tag = soup.find("title")
+    results["title"] = title_tag.get_text(strip=True) if title_tag else None
+    results["title_length"] = len(results["title"]) if results["title"] else 0
+
+    # ---- META DESCRIPTION ----
+    meta_desc = soup.find("meta", attrs={"name": re.compile(r"description", re.I)})
+    results["meta_description"] = meta_desc["content"].strip() if meta_desc and meta_desc.get("content") else None
+    results["meta_desc_length"] = len(results["meta_description"]) if results["meta_description"] else 0
+
+    # ---- HEADINGS ----
+    results["h1_tags"] = [h.get_text(strip=True) for h in soup.find_all("h1")]
+    results["h2_count"] = len(soup.find_all("h2"))
+    results["h3_count"] = len(soup.find_all("h3"))
+
+    # ---- IMAGES ----
+    imgs = soup.find_all("img")
+    results["total_images"] = len(imgs)
+    results["images_no_alt"] = len([i for i in imgs if not i.get("alt") or not i["alt"].strip()])
+
+    # ---- LINKS ----
+    all_links = soup.find_all("a", href=True)
+    parsed_base = urlparse(url)
+    internal = [a for a in all_links if urlparse(urljoin(url, a["href"])).netloc == parsed_base.netloc]
+    external = [a for a in all_links if urlparse(urljoin(url, a["href"])).netloc != parsed_base.netloc and a["href"].startswith("http")]
+    results["internal_links"] = len(internal)
+    results["external_links"] = len(external)
+    results["broken_links_hash"] = len([a for a in all_links if a["href"] == "#"])
+
+    # ---- VIEWPORT (mobile) ----
+    viewport = soup.find("meta", attrs={"name": "viewport"})
+    results["has_viewport"] = viewport is not None
+
+    # ---- CANONICAL ----
+    canonical = soup.find("link", attrs={"rel": "canonical"})
+    results["has_canonical"] = canonical is not None
+    results["canonical_url"] = canonical["href"] if canonical else None
+
+    # ---- SCHEMA / STRUCTURED DATA ----
+    schema_tags = soup.find_all("script", attrs={"type": "application/ld+json"})
+    results["schema_count"] = len(schema_tags)
+    schema_types = []
+    for s in schema_tags:
+        try:
+            d = json.loads(s.string)
+            if isinstance(d, dict):
+                schema_types.append(d.get("@type", "Unknown"))
+            elif isinstance(d, list):
+                schema_types.extend([x.get("@type", "Unknown") for x in d if isinstance(x, dict)])
+        except:
+            pass
+    results["schema_types"] = schema_types
+
+    # ---- OG TAGS ----
+    og_title = soup.find("meta", property="og:title")
+    og_desc = soup.find("meta", property="og:description")
+    og_img = soup.find("meta", property="og:image")
+    results["has_og_title"] = og_title is not None
+    results["has_og_description"] = og_desc is not None
+    results["has_og_image"] = og_img is not None
+
+    # ---- WORD COUNT ----
+    text_content = soup.get_text(separator=" ", strip=True)
+    words = [w for w in text_content.split() if len(w) > 1]
+    results["word_count"] = len(words)
+
+    # ---- HTTPS / SSL ----
+    results["is_https"] = url.startswith("https://") or resp.url.startswith("https://")
+
+    # ---- SECURITY HEADERS ----
+    sec_headers = ["x-content-type-options", "x-frame-options", "strict-transport-security",
+                   "content-security-policy", "x-xss-protection", "referrer-policy"]
+    found_sec = [h for h in sec_headers if h in [k.lower() for k in resp.headers.keys()]]
+    results["security_headers_found"] = found_sec
+    results["security_headers_count"] = len(found_sec)
+
+    # ---- ROBOTS.TXT ----
+    try:
+        rb = req.get(urljoin(url, "/robots.txt"), headers=headers, timeout=5)
+        results["has_robots_txt"] = rb.status_code == 200 and len(rb.text) > 10
+        results["robots_txt_content"] = rb.text[:500] if results["has_robots_txt"] else None
+    except:
+        results["has_robots_txt"] = False
+
+    # ---- SITEMAP ----
+    results["has_sitemap"] = False
+    sitemap_urls_to_check = [urljoin(url, "/sitemap.xml"), urljoin(url, "/sitemap_index.xml")]
+    if results.get("robots_txt_content"):
+        for line in results["robots_txt_content"].split("\n"):
+            if line.lower().startswith("sitemap:"):
+                sitemap_urls_to_check.insert(0, line.split(":", 1)[1].strip())
+    for sm_url in sitemap_urls_to_check:
+        try:
+            sm = req.get(sm_url, headers=headers, timeout=5)
+            if sm.status_code == 200 and ("</urlset>" in sm.text or "</sitemapindex>" in sm.text):
+                results["has_sitemap"] = True
+                results["sitemap_url"] = sm_url
+                break
+        except:
+            pass
+
+    # ---- LANGUAGE ----
+    html_tag = soup.find("html")
+    results["lang"] = html_tag.get("lang") if html_tag else None
+
+    # ---- FAVICON ----
+    favicon = soup.find("link", rel=re.compile(r"icon", re.I))
+    results["has_favicon"] = favicon is not None
+
+    # ---- CSS/JS counts ----
+    results["css_files"] = len(soup.find_all("link", rel="stylesheet"))
+    results["js_files"] = len(soup.find_all("script", src=True))
+
+    # ---- PHONE / EMAIL on page ----
+    phone_patterns = re.findall(r'[\+]?[\d\s\-\(\)]{10,}', text_content)
+    email_patterns = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', text_content)
+    results["phones_found"] = list(set([p.strip() for p in phone_patterns[:5]]))
+    results["emails_found"] = list(set(email_patterns[:5]))
+
+    # ---- FORMS ----
+    results["forms_count"] = len(soup.find_all("form"))
+
+    # ---- RESPONSIVE CSS ----
+    results["has_media_queries"] = "@media" in html
+
+    return results
+
+
+def _build_audit_from_crawl(crawl, business_name, industry, city, url):
+    """Convert raw crawl data into scored audit sections."""
+    if crawl.get("error"):
+        return None
+
+    # Score each section based on real data
+    # 1. Technical SEO
+    tech_score = 50
+    tech_findings = []
+    tech_recs = []
+
+    if crawl.get("title"):
+        tl = crawl["title_length"]
+        tech_findings.append(f"Title tag: \"{crawl['title']}\" ({tl} chars)")
+        if 30 <= tl <= 60: tech_score += 8
+        elif tl > 0: tech_score += 4; tech_recs.append(f"Optimize title length (currently {tl} chars, ideal is 30-60)")
+        else: tech_recs.append("Add a title tag to the page")
+    else:
+        tech_findings.append("Title tag: MISSING"); tech_recs.append("Add a descriptive title tag (30-60 characters)")
+
+    if crawl.get("meta_description"):
+        ml = crawl["meta_desc_length"]
+        tech_findings.append(f"Meta description: \"{crawl['meta_description'][:80]}...\" ({ml} chars)")
+        if 120 <= ml <= 160: tech_score += 8
+        elif ml > 0: tech_score += 4; tech_recs.append(f"Optimize meta description length ({ml} chars, ideal is 120-160)")
+    else:
+        tech_findings.append("Meta description: MISSING"); tech_recs.append("Add a meta description (120-160 characters)")
+
+    if crawl.get("has_canonical"): tech_score += 5; tech_findings.append(f"Canonical URL: {crawl['canonical_url']}")
+    else: tech_findings.append("Canonical tag: Not found"); tech_recs.append("Add a canonical URL tag to prevent duplicate content")
+
+    if crawl.get("has_robots_txt"): tech_score += 5; tech_findings.append("Robots.txt: Found")
+    else: tech_findings.append("Robots.txt: NOT FOUND"); tech_recs.append("Create a robots.txt file")
+
+    if crawl.get("has_sitemap"): tech_score += 7; tech_findings.append(f"XML Sitemap: Found at {crawl.get('sitemap_url', 'sitemap.xml')}")
+    else: tech_findings.append("XML Sitemap: NOT FOUND"); tech_recs.append("Create and submit an XML sitemap to Google Search Console")
+
+    if crawl.get("lang"): tech_score += 3; tech_findings.append(f"Language declared: {crawl['lang']}")
+    else: tech_recs.append("Add lang attribute to <html> tag")
+
+    h1s = crawl.get("h1_tags", [])
+    if len(h1s) == 1: tech_score += 5; tech_findings.append(f"H1 tag: \"{h1s[0][:60]}\"")
+    elif len(h1s) > 1: tech_score += 2; tech_findings.append(f"H1 tags: {len(h1s)} found (should be 1)"); tech_recs.append("Use only one H1 tag per page")
+    else: tech_findings.append("H1 tag: MISSING"); tech_recs.append("Add a single H1 heading to the page")
+
+    tech_findings.append(f"H2 tags: {crawl.get('h2_count', 0)} | H3 tags: {crawl.get('h3_count', 0)}")
+    tech_score = min(tech_score, 100)
+
+    # 2. On-Page SEO
+    onpage_score = 50
+    onpage_findings = []
+    onpage_recs = []
+
+    onpage_findings.append(f"Internal links: {crawl.get('internal_links', 0)}")
+    if crawl.get("internal_links", 0) >= 10: onpage_score += 10
+    elif crawl.get("internal_links", 0) >= 5: onpage_score += 5
+    else: onpage_recs.append("Add more internal links to improve site structure")
+
+    onpage_findings.append(f"External links: {crawl.get('external_links', 0)}")
+    if crawl.get("external_links", 0) >= 2: onpage_score += 5
+
+    onpage_findings.append(f"Images: {crawl.get('total_images', 0)} total, {crawl.get('images_no_alt', 0)} missing alt text")
+    if crawl.get("images_no_alt", 0) == 0 and crawl.get("total_images", 0) > 0: onpage_score += 10
+    elif crawl.get("images_no_alt", 0) > 0: onpage_recs.append(f"Add alt text to {crawl['images_no_alt']} images for SEO and accessibility")
+
+    onpage_findings.append(f"Hash (#) links: {crawl.get('broken_links_hash', 0)}")
+    if crawl.get("broken_links_hash", 0) > 3: onpage_recs.append(f"Fix {crawl['broken_links_hash']} placeholder links (href='#')")
+    elif crawl.get("broken_links_hash", 0) == 0: onpage_score += 5
+
+    if crawl.get("has_favicon"): onpage_score += 3; onpage_findings.append("Favicon: Found")
+    else: onpage_findings.append("Favicon: Not found"); onpage_recs.append("Add a favicon for brand recognition in browser tabs")
+
+    onpage_findings.append(f"CSS files: {crawl.get('css_files', 0)} | JS files: {crawl.get('js_files', 0)}")
+    onpage_score = min(onpage_score, 100)
+
+    # 3. Content Quality
+    content_score = 45
+    content_findings = []
+    content_recs = []
+    wc = crawl.get("word_count", 0)
+    content_findings.append(f"Word count (homepage): {wc} words")
+    if wc >= 1000: content_score += 20
+    elif wc >= 500: content_score += 12; content_recs.append("Aim for 1000+ words on your homepage for better rankings")
+    elif wc >= 200: content_score += 5; content_recs.append(f"Homepage has only {wc} words — aim for 800-1500 for competitive SEO")
+    else: content_recs.append("Very thin content detected — add substantial text content to your homepage")
+
+    if crawl.get("forms_count", 0) > 0: content_score += 8; content_findings.append(f"Contact/Lead forms: {crawl['forms_count']} found")
+    else: content_findings.append("Contact forms: None found"); content_recs.append("Add a contact/lead capture form to convert visitors")
+
+    if crawl.get("phones_found"): content_score += 5; content_findings.append(f"Phone numbers on page: {', '.join(crawl['phones_found'][:3])}")
+    else: content_recs.append("Add your phone number visibly on the page")
+
+    if crawl.get("emails_found"): content_score += 5; content_findings.append(f"Email addresses on page: {', '.join(crawl['emails_found'][:3])}")
+    else: content_recs.append("Add your email address visibly on the page")
+
+    content_score = min(content_score, 100)
+
+    # 4. Schema / Entity SEO
+    schema_score = 30
+    schema_findings = []
+    schema_recs = []
+    if crawl.get("schema_count", 0) > 0:
+        schema_score += 30
+        schema_findings.append(f"Structured data found: {crawl['schema_count']} JSON-LD blocks")
+        schema_findings.append(f"Schema types: {', '.join(crawl.get('schema_types', ['Unknown']))}")
+        if "LocalBusiness" in str(crawl.get("schema_types", [])): schema_score += 15
+        else: schema_recs.append("Add LocalBusiness schema markup for local SEO")
+        if "Organization" in str(crawl.get("schema_types", [])): schema_score += 5
+    else:
+        schema_findings.append("Structured data (JSON-LD): NOT FOUND")
+        schema_recs.append("Add JSON-LD structured data (LocalBusiness, Organization, FAQ)")
+        schema_recs.append("Schema markup helps Google understand your business and show rich results")
+    schema_score = min(schema_score, 100)
+
+    # 5. Social / OG Tags
+    social_score = 30
+    social_findings = []
+    social_recs = []
+    if crawl.get("has_og_title"): social_score += 20; social_findings.append("Open Graph title: Found")
+    else: social_findings.append("Open Graph title: MISSING"); social_recs.append("Add og:title meta tag for social sharing")
+    if crawl.get("has_og_description"): social_score += 15; social_findings.append("Open Graph description: Found")
+    else: social_findings.append("Open Graph description: MISSING"); social_recs.append("Add og:description meta tag")
+    if crawl.get("has_og_image"): social_score += 20; social_findings.append("Open Graph image: Found")
+    else: social_findings.append("Open Graph image: MISSING"); social_recs.append("Add og:image for attractive social media previews (1200x630px recommended)")
+    social_score = min(social_score, 100)
+
+    # 6. Security
+    sec_score = 40
+    sec_findings = []
+    sec_recs = []
+    if crawl.get("is_https"): sec_score += 25; sec_findings.append("HTTPS: Active ✓")
+    else: sec_findings.append("HTTPS: NOT ACTIVE — Critical issue"); sec_recs.append("Enable HTTPS immediately — Google penalizes non-HTTPS sites")
+
+    shc = crawl.get("security_headers_count", 0)
+    sec_findings.append(f"Security headers: {shc}/6 found ({', '.join(crawl.get('security_headers_found', []))})")
+    sec_score += shc * 4
+    missing_headers = [h for h in ["x-content-type-options", "x-frame-options", "strict-transport-security",
+                                    "content-security-policy", "x-xss-protection", "referrer-policy"]
+                       if h not in crawl.get("security_headers_found", [])]
+    if missing_headers: sec_recs.append(f"Add missing security headers: {', '.join(missing_headers[:3])}")
+    sec_score = min(sec_score, 100)
+
+    # 7. Performance
+    perf_score = 50
+    perf_findings = []
+    perf_recs = []
+    lt = crawl.get("load_time", 99)
+    perf_findings.append(f"Server response time: {lt}s")
+    if lt < 1: perf_score += 30
+    elif lt < 2: perf_score += 20
+    elif lt < 3: perf_score += 10
+    else: perf_recs.append(f"Page took {lt}s to respond — aim for under 2 seconds")
+
+    page_kb = crawl.get("content_length", 0) / 1024
+    perf_findings.append(f"HTML size: {round(page_kb, 1)} KB")
+    if page_kb < 100: perf_score += 10
+    elif page_kb < 300: perf_score += 5
+    else: perf_recs.append("HTML is large — consider splitting content across pages")
+
+    js_count = crawl.get("js_files", 0)
+    css_count = crawl.get("css_files", 0)
+    perf_findings.append(f"External resources: {js_count} JS files, {css_count} CSS files")
+    if js_count + css_count <= 10: perf_score += 5
+    else: perf_recs.append(f"Reduce number of external resources ({js_count} JS + {css_count} CSS) — combine or defer loading")
+    perf_score = min(perf_score, 100)
+
+    # 8. Mobile
+    mobile_score = 40
+    mobile_findings = []
+    mobile_recs = []
+    if crawl.get("has_viewport"): mobile_score += 30; mobile_findings.append("Viewport meta tag: Found ✓")
+    else: mobile_findings.append("Viewport meta tag: MISSING — Critical"); mobile_recs.append("Add <meta name='viewport' content='width=device-width, initial-scale=1'> — essential for mobile")
+    # Responsive indicators
+    responsive_css = crawl.get("has_media_queries", False)
+    if responsive_css: mobile_score += 15; mobile_findings.append("Responsive CSS (@media queries): Detected")
+    else: mobile_findings.append("Responsive CSS: Not clearly detected"); mobile_recs.append("Ensure CSS uses @media queries for responsive design")
+    mobile_score = min(mobile_score, 100)
+
+    # Build sections
+    sections = [
+        {"name": "Technical SEO", "score": tech_score, "icon": "🔧", "findings": tech_findings, "recommendations": tech_recs or ["Technical SEO looks solid — maintain current setup"]},
+        {"name": "On-Page SEO", "score": onpage_score, "icon": "📄", "findings": onpage_findings, "recommendations": onpage_recs or ["On-page optimization is in good shape"]},
+        {"name": "Content Quality", "score": content_score, "icon": "📝", "findings": content_findings, "recommendations": content_recs or ["Content is well-structured"]},
+        {"name": "Schema & Entity SEO", "score": schema_score, "icon": "🏷️", "findings": schema_findings, "recommendations": schema_recs or ["Structured data is well-implemented"]},
+        {"name": "Social Media SEO", "score": social_score, "icon": "📱", "findings": social_findings, "recommendations": social_recs or ["Social sharing tags are set up correctly"]},
+        {"name": "Security & SSL", "score": sec_score, "icon": "🔒", "findings": sec_findings, "recommendations": sec_recs or ["Security is well-configured"]},
+        {"name": "Performance", "score": perf_score, "icon": "⚡", "findings": perf_findings, "recommendations": perf_recs or ["Performance is good"]},
+        {"name": "Mobile Readiness", "score": mobile_score, "icon": "📲", "findings": mobile_findings, "recommendations": mobile_recs or ["Mobile optimization is solid"]},
+    ]
+
+    overall = round(sum(s["score"] for s in sections) / len(sections))
+    grade = "A+" if overall >= 90 else "A" if overall >= 80 else "B" if overall >= 70 else "C" if overall >= 55 else "D" if overall >= 40 else "F"
+
+    # Build top 3 priorities from lowest-scoring sections
+    sorted_secs = sorted(sections, key=lambda x: x["score"])
+    priorities = []
+    for s in sorted_secs[:3]:
+        if s["recommendations"]:
+            priorities.append(f"{s['icon']} {s['name']} (Score: {s['score']}/100) — {s['recommendations'][0]}")
+
+    return {
+        "business_name": business_name,
+        "website": url,
+        "industry": industry,
+        "audit_date": datetime.now().strftime("%B %d, %Y"),
+        "overall_score": overall,
+        "grade": grade,
+        "sections": sections,
+        "top_3_priorities": priorities,
+        "mode": "live_crawl",
+        "provider": "real_crawler",
+        "note": f"REAL AUDIT — This report is based on a live crawl of {url} performed on {datetime.now().strftime('%B %d, %Y at %H:%M UTC')}. All data is from actual website analysis, not estimates."
+    }
+
 
 @app.post("/api/public/free-audit")
 async def public_free_audit(request: Request):
-    """Public endpoint for free audit form — no login needed. Returns instant demo audit."""
+    """Public endpoint for free audit form — no login needed. Returns REAL crawl-based audit."""
     data = await request.json()
     website = data.get("website", "").strip()
     business_name = data.get("business_name", "Your Business").strip()
@@ -2568,190 +2965,46 @@ async def public_free_audit(request: Request):
     phone = data.get("phone", "").strip()
     industry = data.get("industry", "general").strip()
     city = data.get("city", "").strip()
-    
+
     if not business_name:
         raise HTTPException(status_code=400, detail="Business name is required")
-    
-    # Use website URL in the audit or default
+
     site_url = website if website else f"https://{business_name.lower().replace(' ','-')}.com"
-    
-    # Check if we have a real AI API key
+    if not site_url.startswith("http"):
+        site_url = "https://" + site_url
+
+    # Real crawl
+    crawl = _real_crawl_audit(site_url, business_name, industry, city)
+    audit_result = None
+    if crawl.get("crawled") and not crawl.get("error"):
+        audit_result = _build_audit_from_crawl(crawl, business_name, industry, city, site_url)
+
+    if not audit_result:
+        # Fallback if crawl fails
+        audit_result = {
+            "business_name": business_name, "website": site_url, "industry": industry,
+            "audit_date": datetime.now().strftime("%B %d, %Y"),
+            "overall_score": 0, "grade": "N/A",
+            "sections": [{"name": "Crawl Error", "score": 0, "icon": "❌",
+                          "findings": [f"Could not reach {site_url}: {crawl.get('error', 'Unknown error')}"],
+                          "recommendations": ["Verify the URL is correct and the website is online", "Check that the site is not blocking bots"]}],
+            "top_3_priorities": ["Fix website accessibility — the site could not be reached for analysis"],
+            "mode": "error", "provider": "crawler",
+            "note": f"Could not crawl {site_url}. Please verify the URL is correct and try again."
+        }
+
+    # Save lead
     db = get_db()
-    api = db.execute("SELECT * FROM api_settings WHERE provider IN ('claude','chatgpt','gemini') AND is_active=1 AND api_key IS NOT NULL LIMIT 1").fetchone()
-    
-    if api and api["api_key"]:
-        provider = api["provider"]
-        # PRODUCTION: Real AI audit call would go here
-        # For now, use enhanced demo response
-    else:
-        provider = "demo"
-    
-    # Generate comprehensive audit result customized to the submitted website
-    import random
-    speed_score = random.randint(55, 92)
-    mobile_score = random.randint(60, 95)
-    seo_score = random.randint(50, 88)
-    security_score = random.randint(65, 100)
-    content_score = random.randint(55, 90)
-    overall = int((speed_score + mobile_score + seo_score + security_score + content_score) / 5)
-    
-    audit_result = {
-        "business_name": business_name,
-        "website": site_url,
-        "industry": industry,
-        "audit_date": datetime.now().strftime("%B %d, %Y"),
-        "overall_score": overall,
-        "grade": "A" if overall >= 85 else ("B" if overall >= 70 else ("C" if overall >= 55 else "D")),
-        "sections": [
-            {
-                "name": "Site Speed & Performance",
-                "score": speed_score,
-                "icon": "⚡",
-                "status": "good" if speed_score >= 75 else "needs_work",
-                "findings": [
-                    f"Page load time: {round(random.uniform(1.5, 4.2), 1)}s (target: under 3s)",
-                    f"First Contentful Paint: {round(random.uniform(0.8, 2.5), 1)}s",
-                    f"Largest Contentful Paint: {round(random.uniform(1.5, 4.0), 1)}s",
-                    f"Total page size: {round(random.uniform(1.2, 5.8), 1)}MB",
-                    f"Number of requests: {random.randint(25, 85)}"
-                ],
-                "recommendations": [
-                    "Compress images to WebP format (can save 40-60% file size)",
-                    "Enable browser caching for static assets",
-                    "Minify CSS and JavaScript files",
-                    "Consider using a CDN for faster content delivery",
-                    "Defer loading of non-critical JavaScript"
-                ]
-            },
-            {
-                "name": "Mobile Usability",
-                "score": mobile_score,
-                "icon": "📱",
-                "status": "good" if mobile_score >= 75 else "needs_work",
-                "findings": [
-                    f"Mobile-friendly: {'Yes' if mobile_score >= 70 else 'Needs improvement'}",
-                    f"Viewport configured: {'Yes' if mobile_score >= 60 else 'Missing'}",
-                    f"Text readability: {'Good' if mobile_score >= 75 else 'Too small on mobile'}",
-                    f"Touch targets: {'Properly sized' if mobile_score >= 80 else 'Some buttons too small'}",
-                    f"Content width: {'Fits screen' if mobile_score >= 70 else 'Horizontal scrolling detected'}"
-                ],
-                "recommendations": [
-                    "Ensure all buttons are at least 44x44px for easy tapping",
-                    "Use responsive images with srcset for different screen sizes",
-                    "Test on multiple devices (iPhone, Android, iPad)",
-                    "Ensure font size is at least 16px on mobile",
-                    "Remove horizontal scrolling on small screens"
-                ]
-            },
-            {
-                "name": "SEO Analysis",
-                "score": seo_score,
-                "icon": "🔍",
-                "status": "good" if seo_score >= 75 else "needs_work",
-                "findings": [
-                    f"Title tag: {'Present' if seo_score >= 50 else 'Missing'} ({random.randint(30, 70)} characters)",
-                    f"Meta description: {'Present' if seo_score >= 55 else 'Missing'} ({random.randint(100, 160)} characters)",
-                    f"H1 tags: {random.randint(1, 3)} found",
-                    f"Internal links: {random.randint(5, 45)} found",
-                    f"Images without alt text: {random.randint(0, 12)} found",
-                    f"Schema markup: {'Detected' if seo_score >= 70 else 'Not found'}",
-                    f"Sitemap: {'Found' if seo_score >= 65 else 'Not found'}",
-                    f"Robots.txt: {'Found' if seo_score >= 60 else 'Not found'}"
-                ],
-                "recommendations": [
-                    f"Optimize title tag to include '{business_name}' + primary keyword",
-                    "Add meta descriptions to all pages (150-160 characters)",
-                    "Add alt text to all images for accessibility and SEO",
-                    "Implement LocalBusiness schema markup for local SEO",
-                    "Create and submit an XML sitemap to Google Search Console",
-                    "Add internal links between related service pages",
-                    f"Target local keywords: '{industry} services in {city}'" if city else "Target location-specific keywords"
-                ]
-            },
-            {
-                "name": "Security & Technical",
-                "score": security_score,
-                "icon": "🔒",
-                "status": "good" if security_score >= 75 else "needs_work",
-                "findings": [
-                    f"HTTPS: {'Active' if security_score >= 70 else 'Not configured'}",
-                    f"SSL Certificate: {'Valid' if security_score >= 70 else 'Missing or expired'}",
-                    f"Mixed content: {'None detected' if security_score >= 80 else 'HTTP resources found on HTTPS page'}",
-                    f"Security headers: {random.randint(2, 6)}/6 present",
-                    f"HSTS: {'Enabled' if security_score >= 85 else 'Not enabled'}"
-                ],
-                "recommendations": [
-                    "Ensure all pages use HTTPS (redirect HTTP to HTTPS)",
-                    "Add security headers: X-Content-Type-Options, X-Frame-Options",
-                    "Enable HSTS (HTTP Strict Transport Security)",
-                    "Fix any mixed content warnings",
-                    "Keep SSL certificate auto-renewed"
-                ]
-            },
-            {
-                "name": "Content Quality",
-                "score": content_score,
-                "icon": "📝",
-                "status": "good" if content_score >= 75 else "needs_work",
-                "findings": [
-                    f"Estimated word count (homepage): {random.randint(200, 1200)} words",
-                    f"Unique pages detected: {random.randint(5, 25)}",
-                    f"Blog/News section: {'Found' if content_score >= 70 else 'Not found'}",
-                    f"Call-to-action elements: {random.randint(1, 5)} found",
-                    f"Contact information visible: {'Yes' if content_score >= 60 else 'Hard to find'}"
-                ],
-                "recommendations": [
-                    "Aim for 800+ words on key service pages",
-                    "Start a blog with regular industry content (2-4 posts/month)",
-                    f"Create dedicated service pages for each {industry} offering",
-                    "Add customer testimonials and case studies",
-                    "Include clear calls-to-action on every page",
-                    "Add an FAQ section with common customer questions"
-                ]
-            },
-            {
-                "name": "Local SEO",
-                "score": random.randint(40, 85),
-                "icon": "📍",
-                "status": "needs_work",
-                "findings": [
-                    f"Google Business Profile: {'Likely claimed' if random.random() > 0.4 else 'Not verified or not found'}",
-                    f"NAP consistency: {'Needs review' if random.random() > 0.3 else 'Consistent across directories'}",
-                    f"Local citations: Estimated {random.randint(5, 40)} directory listings",
-                    f"Review count: Check Google for current reviews",
-                    f"Local keywords: {'Some detected' if random.random() > 0.5 else 'Not optimized for local search'}"
-                ],
-                "recommendations": [
-                    "Claim and fully optimize your Google Business Profile",
-                    "Ensure NAP (Name, Address, Phone) is identical everywhere",
-                    f"Get listed on top directories: Yelp, Yellow Pages, {industry}-specific directories",
-                    "Actively ask happy customers for Google reviews",
-                    f"Add location pages if serving multiple areas near {city}" if city else "Add location-specific landing pages",
-                    "Post weekly updates on Google Business Profile"
-                ]
-            }
-        ],
-        "top_3_priorities": [
-            f"1. {'Set up Google Business Profile' if seo_score < 70 else 'Optimize existing GBP listing'} — This alone can 3x your local visibility",
-            f"2. {'Improve site speed (currently {0}s load time)'.format(round(random.uniform(2.5, 4.0), 1)) if speed_score < 75 else 'Add schema markup for rich search results'}",
-            f"3. {'Start creating content targeting local keywords' if content_score < 70 else 'Build local citations and get more reviews'}"
-        ],
-        "mode": "demo" if provider == "demo" else "live",
-        "provider": provider,
-        "note": "This is an AI-powered preliminary audit. For a comprehensive deep-dive analysis with actionable implementation plan, contact our team." if provider != "demo" else "Demo audit — connect a real AI API key (Claude/ChatGPT/Gemini) in dashboard Settings for deeper, AI-powered analysis."
-    }
-    
-    # Save as lead in database
     try:
         db.execute("""INSERT OR IGNORE INTO sales_leads (business_name, contact_name, email, phone, industry, city, website, source, status, notes)
                       VALUES (?,?,?,?,?,?,?,?,?,?)""",
                    (business_name, contact_name, email, phone, industry, city, site_url, "free_audit", "new",
-                    json.dumps({"audit_score": overall, "audit_date": datetime.now().isoformat()})))
+                    json.dumps({"audit_score": audit_result.get("overall_score", 0), "audit_date": datetime.now().isoformat()})))
         db.commit()
     except:
         pass
     db.close()
-    
+
     return {"message": "Audit completed", "audit": audit_result}
 
 
