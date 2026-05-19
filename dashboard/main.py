@@ -1292,12 +1292,16 @@ def _get_ops_manager_data(db):
 async def add_ranking(request: Request):
     user = require_role(request, ["super_admin", "operations_manager", "worker", "tech_seo"])
     data = await request.json()
+    kw = data.get("keyword", "").strip()
+    pos = data.get("position")
+    if not kw or pos is None:
+        raise HTTPException(status_code=400, detail="Keyword and position are required")
     db = get_db()
     prev = db.execute("SELECT position FROM keyword_rankings WHERE client_id=? AND keyword=? ORDER BY tracked_date DESC LIMIT 1",
-                      (data["client_id"], data["keyword"])).fetchone()
+                      (data["client_id"], kw)).fetchone()
     prev_pos = prev["position"] if prev else None
     db.execute("INSERT INTO keyword_rankings (client_id, keyword, position, previous_position, search_volume, url) VALUES (?,?,?,?,?,?)",
-               (data["client_id"], data["keyword"], data["position"], prev_pos, data.get("search_volume", 0), data.get("url")))
+               (data["client_id"], kw, pos, prev_pos, data.get("search_volume", 0), data.get("url", "")))
     db.commit()
     db.close()
     return {"message": "Ranking recorded"}

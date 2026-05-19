@@ -23,10 +23,10 @@
 
 <div class="stats-grid">
 <div class="stat-card"><div class="stat-label">Keywords Tracked</div><div class="stat-value cyan">{{ keywords|length }}</div></div>
-<div class="stat-card"><div class="stat-label">Top 3 Positions</div><div class="stat-value green">{{ keywords.values()|selectattr('current','le',3)|list|length }}</div></div>
-<div class="stat-card"><div class="stat-label">Top 10 Positions</div><div class="stat-value">{{ keywords.values()|selectattr('current','le',10)|list|length }}</div></div>
+<div class="stat-card"><div class="stat-label">Top 3 Positions</div><div class="stat-value green">{{ keywords.values()|selectattr('current','ne',None)|selectattr('current','le',3)|list|length }}</div></div>
+<div class="stat-card"><div class="stat-label">Top 10 Positions</div><div class="stat-value">{{ keywords.values()|selectattr('current','ne',None)|selectattr('current','le',10)|list|length }}</div></div>
 <div class="stat-card"><div class="stat-label">Avg Position</div>
-<div class="stat-value">{% if keywords %}{{ "%.1f"|format(keywords.values()|map(attribute='current')|sum / keywords|length) }}{% else %}—{% endif %}</div></div>
+<div class="stat-value">{% set valid_kws = keywords.values()|selectattr('current','ne',None)|list %}{% if valid_kws %}{{ "%.1f"|format(valid_kws|map(attribute='current')|sum / valid_kws|length) }}{% else %}—{% endif %}</div></div>
 </div>
 
 <!-- Chart Section -->
