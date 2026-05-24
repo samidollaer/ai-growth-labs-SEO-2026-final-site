@@ -142,6 +142,59 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Sticky CTA bar - show after scrolling past hero
+  const stickyCTA = document.getElementById('stickyCTA');
+  if (stickyCTA) {
+    let ctaDismissed = false;
+    window.addEventListener('scroll', () => {
+      if (ctaDismissed) return;
+      if (window.scrollY > 600) {
+        stickyCTA.classList.add('visible');
+      } else {
+        stickyCTA.classList.remove('visible');
+      }
+    });
+    const closeBtn = stickyCTA.querySelector('.sticky-cta-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        ctaDismissed = true;
+        stickyCTA.classList.remove('visible');
+      });
+    }
+  }
+
+  // Mobile mega-menu sidebar
+  if (navToggle && navLinks) {
+    // Close mega menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 768 && navLinks.classList.contains('active')) {
+        if (!navLinks.contains(e.target) && !navToggle.contains(e.target)) {
+          navLinks.classList.remove('active');
+        }
+      }
+    });
+  }
+
+  // Lazy load images below fold
+  if ('IntersectionObserver' in window) {
+    const imgObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          if (img.dataset.src) {
+            img.src = img.dataset.src;
+            img.removeAttribute('data-src');
+          }
+          imgObserver.unobserve(img);
+        }
+      });
+    }, { rootMargin: '200px' });
+
+    document.querySelectorAll('img[data-src]').forEach(img => {
+      imgObserver.observe(img);
+    });
+  }
+
   // WhatsApp floating button (all pages)
   if (!document.querySelector('.wa-float-btn')) {
     const waBtn = document.createElement('a');
