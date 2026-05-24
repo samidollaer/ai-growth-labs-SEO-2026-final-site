@@ -45,12 +45,12 @@
 <div class="kanban-col"><h4>⏳ Pending</h4>
 {% for t in my_tasks if t.status == 'pending' %}
 <div class="kanban-card"><div class="kanban-card-header"><span class="badge badge-{{ t.priority }}">{{ t.priority }}</span>
-{% if t.is_automated %}<span class="badge badge-auto">🤖 Auto</span>{% endif %}</div>
+{% if t.is_automated %}<span class="badge badge-auto">⚡ Auto</span>{% endif %}</div>
 <h5>{{ t.title }}</h5><small>{{ t.business_name }} — {{ t.project_title }}</small>
 <div class="kanban-actions">
 <button class="btn btn-sm btn-primary" onclick="moveTask({{ t.id }},'in_progress')">Start →</button>
 <button class="btn btn-sm btn-secondary" onclick="startTimer({{ t.id }},'{{ t.title }}')">⏱️</button>
-{% if t.is_automated %}<button class="btn btn-sm btn-warning" onclick="runAutoTask({{ t.id }})">🤖 Run AI</button>{% endif %}
+{% if t.is_automated %}<button class="btn btn-sm btn-warning" onclick="runAutoTask({{ t.id }})">⚡ Run AI</button>{% endif %}
 </div></div>{% endfor %}</div>
 <div class="kanban-col"><h4>🔄 In Progress</h4>
 {% for t in my_tasks if t.status == 'in_progress' %}

@@ -55,7 +55,7 @@
 <table><thead><tr><th>Category</th><th>Task</th><th>Description</th><th>Type</th></tr></thead><tbody>
 {% for pt in package_tasks %}
 <tr><td><span class="badge badge-active">{{ pt.category }}</span></td><td>{{ pt.title }}</td>
-<td>{{ pt.description[:80] }}</td><td>{% if pt.is_automated %}<span class="badge badge-auto">🤖 Auto</span>{% else %}<span class="badge badge-pending">Manual</span>{% endif %}</td></tr>
+<td>{{ pt.description[:80] }}</td><td>{% if pt.is_automated %}<span class="badge badge-auto">⚡ Auto</span>{% else %}<span class="badge badge-pending">Manual</span>{% endif %}</td></tr>
 {% endfor %}</tbody></table></div>
 {% endif %}
 
@@ -67,7 +67,7 @@
 {% for t in tasks_by_project[p.id] %}
 <tr><td>{{ t.title }}</td><td>{{ t.assigned_name or '-' }}</td><td><span class="badge badge-{{ t.priority }}">{{ t.priority }}</span></td>
 <td><span class="badge badge-{{ t.status|replace(' ','_') }}">{{ t.status }}</span></td>
-<td>{% if t.is_automated %}<span class="badge badge-auto">🤖</span>{% else %}-{% endif %}</td></tr>
+<td>{% if t.is_automated %}<span class="badge badge-auto">⚡</span>{% else %}-{% endif %}</td></tr>
 {% endfor %}</tbody></table>{% endif %}</div>
 {% endfor %}
 

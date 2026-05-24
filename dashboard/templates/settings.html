@@ -16,7 +16,7 @@
 <div class="header-actions"><a href="/dashboard" class="btn btn-outline">← Back to Dashboard</a>
 <button class="btn btn-primary" onclick="checkAllStatus()">🔄 Check All Status</button></div></div>
 
-<h2 style="margin:20px 0 10px;color:#CBD5E1;font-size:14px;text-transform:uppercase;letter-spacing:1px">🤖 AI Providers</h2>
+<h2 style="margin:20px 0 10px;color:#CBD5E1;font-size:14px;text-transform:uppercase;letter-spacing:1px">🧠 AI Providers</h2>
 <div class="settings-grid">
 {% for s in api_settings %}{% if s.provider in ['claude','chatgpt','gemini'] %}
 <div class="card setting-card"><h3>
@@ -107,7 +107,7 @@
 <button class="btn btn-primary btn-full" onclick="saveFuncConfig('content_generation')" style="margin-top:8px">Save Preference</button>
 </div>
 
-<div class="card setting-card"><h3>🤖 AI Chat Assistant</h3>
+<div class="card setting-card"><h3>💬 AI Chat Assistant</h3>
 <div class="setting-status">AI Provider: <select id="func_chat_provider" class="form-select" style="width:auto;display:inline-block;margin-left:8px">
 <option value="demo">Demo Mode</option>
 <option value="claude">Claude</option>
@@ -170,7 +170,7 @@
 <div class="card" style="margin-top:30px"><h3>📋 Integration Guide</h3>
 <div class="info-grid">
 <div class="info-item"><h4>🔍 Free DNA Audit</h4><p>Now uses a REAL website crawler. No API key needed — audits return actual data from crawling the site. Add AI key for enhanced recommendations.</p></div>
-<div class="info-item"><h4>🤖 AI Providers</h4><p>Powers: content generation, competitor analysis, AI chat assistant. Need at least ONE AI key for AI features.</p></div>
+<div class="info-item"><h4>🧠 AI Providers</h4><p>Powers: content generation, competitor analysis, AI chat assistant. Need at least ONE AI key for AI features.</p></div>
 <div class="info-item"><h4>📧 SMTP</h4><p>Powers: Email reports to clients, payment reminders, notification emails. Gmail App Password works.</p></div>
 <div class="info-item"><h4>📞 Twilio</h4><p>Powers: Inbound/outbound calls, AI voice agent, SMS alerts, call recording. $1/mo + per-call cost.</p></div>
 <div class="info-item"><h4>💬 WhatsApp</h4><p>Powers: Client updates via WhatsApp, report sharing, appointment reminders. Needs Meta Business account.</p></div>

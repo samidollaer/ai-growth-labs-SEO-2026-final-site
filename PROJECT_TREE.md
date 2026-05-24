@@ -331,7 +331,7 @@ The free audit performs a **real website crawl** and checks 16 categories:
 | 16 | E-E-A-T Author Signals | Author attribution, about page, contact info, social proof, credentials |
 
 ### Report Output Categories
-- **🤖 AI Automated Tasks** — Tasks AI handles automatically (no login needed)
+- **⚡ AI Automated Tasks** — Tasks AI handles automatically (no login needed)
 - **👨‍💻 Human Action Required** — Tasks needing content creation or design decisions
 - **🔑 Login Credentials Required** — Tasks requiring third-party API keys (with links where to get them)
 

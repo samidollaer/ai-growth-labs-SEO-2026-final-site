@@ -207,11 +207,11 @@ def gen_worker():
 <div class="kanban-col"><h4>⏳ Pending</h4>
 {% for t in my_tasks if t.status == 'pending' %}
 <div class="kanban-card"><div class="kanban-card-header"><span class="badge badge-{{ t.priority }}">{{ t.priority }}</span>
-{% if t.is_automated %}<span class="badge badge-auto">🤖 Auto</span>{% endif %}</div>
+{% if t.is_automated %}<span class="badge badge-auto">⚡ Auto</span>{% endif %}</div>
 <h5>{{ t.title }}</h5><small>{{ t.business_name }} — {{ t.project_title }}</small>
 <div class="kanban-actions">
 <button class="btn btn-sm btn-primary" onclick="moveTask({{ t.id }},'in_progress')">Start →</button>
-{% if t.is_automated %}<button class="btn btn-sm btn-warning" onclick="runAutoTask({{ t.id }})">🤖 Run AI</button>{% endif %}
+{% if t.is_automated %}<button class="btn btn-sm btn-warning" onclick="runAutoTask({{ t.id }})">⚡ Run AI</button>{% endif %}
 </div></div>{% endfor %}</div>
 <div class="kanban-col"><h4>🔄 In Progress</h4>
 {% for t in my_tasks if t.status == 'in_progress' %}
@@ -402,7 +402,7 @@ def gen_social():
 <td>{% if p.engagement_data %}{{ p.engagement_data }}{% else %}-{% endif %}</td><td>{{ p.scheduled_date or p.created_at }}</td></tr>
 {% endfor %}</tbody></table></div>
 
-<div class="card"><h3>🤖 AI Content Generator</h3>
+<div class="card"><h3>✍️ AI Content Generator</h3>
 <div class="tools-grid">
 <div class="tool-card"><h4>💬 Engagement</h4><p>Questions, polls, tips</p></div>
 <div class="tool-card"><h4>📚 Educational</h4><p>How-to, tips, guides</p></div>
@@ -713,7 +713,7 @@ def gen_client_detail():
 <table><thead><tr><th>Category</th><th>Task</th><th>Description</th><th>Type</th></tr></thead><tbody>
 {% for pt in package_tasks %}
 <tr><td><span class="badge badge-active">{{ pt.category }}</span></td><td>{{ pt.title }}</td>
-<td>{{ pt.description[:80] }}</td><td>{% if pt.is_automated %}<span class="badge badge-auto">🤖 Auto</span>{% else %}<span class="badge badge-pending">Manual</span>{% endif %}</td></tr>
+<td>{{ pt.description[:80] }}</td><td>{% if pt.is_automated %}<span class="badge badge-auto">⚡ Auto</span>{% else %}<span class="badge badge-pending">Manual</span>{% endif %}</td></tr>
 {% endfor %}</tbody></table></div>
 {% endif %}
 
@@ -725,7 +725,7 @@ def gen_client_detail():
 {% for t in tasks_by_project[p.id] %}
 <tr><td>{{ t.title }}</td><td>{{ t.assigned_name or '-' }}</td><td><span class="badge badge-{{ t.priority }}">{{ t.priority }}</span></td>
 <td><span class="badge badge-{{ t.status|replace(' ','_') }}">{{ t.status }}</span></td>
-<td>{% if t.is_automated %}<span class="badge badge-auto">🤖</span>{% else %}-{% endif %}</td></tr>
+<td>{% if t.is_automated %}<span class="badge badge-auto">⚡</span>{% else %}-{% endif %}</td></tr>
 {% endfor %}</tbody></table>{% endif %}</div>
 {% endfor %}
 

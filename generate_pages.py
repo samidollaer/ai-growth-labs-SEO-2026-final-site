@@ -9,7 +9,7 @@ NAV = '''<nav class="nav" id="nav"><div class="nav-inner"><a href="../" class="n
 FOOTER = '''<footer class="footer"><div class="container"><div class="footer-grid"><div class="footer-brand"><div class="logo">AI Growth<span>Labs</span></div><p>AI-powered SEO &amp; reputation management for USA businesses.</p></div><div class="footer-col"><h4>Services</h4><a href="local-seo.html">Local SEO</a><a href="gbp-optimization.html">GBP Optimization</a><a href="reputation-management.html">Reputation Management</a><a href="ai-seo.html">AI SEO</a><a href="paid-advertising.html">Paid Ads</a><a href="social-media.html">Social Media</a><a href="content-creation.html">Content Creation</a></div><div class="footer-col"><h4>Industries</h4><a href="seo-for-dentists.html">Dentists</a><a href="seo-for-lawyers.html">Lawyers</a><a href="seo-for-restaurants.html">Restaurants</a><a href="seo-for-plumbers.html">Plumbers</a><a href="seo-for-hvac.html">HVAC</a><a href="seo-for-medical-spas.html">Medical Spas</a></div><div class="footer-col"><h4>Company</h4><a href="about.html">About</a><a href="case-studies.html">Case Studies</a><a href="blog.html">Blog</a><a href="contact.html">Contact</a><a href="free-audit.html">Free Audit</a><a href="privacy-policy.html">Privacy</a><a href="terms.html">Terms</a></div></div><div class="footer-bottom"><span>© 2026 AI Growth Labs. All rights reserved.</span><span>🇺🇸 Serving USA businesses</span></div></div></footer>'''
 
 CHATBOT = '''<div class="floating-cta"><a href="free-audit.html" class="float-btn float-audit">📊 Free Audit</a><button class="float-btn float-chat" id="chatToggle">💬 Chat</button></div>
-<div class="chatbot-container" id="chatbot"><div class="chat-header"><div class="chat-header-info"><div class="chat-avatar">🤖</div><div><h4>AI Growth Assistant</h4><p>Online</p></div></div><button class="chat-close" id="chatClose">✕</button></div><div class="chat-messages" id="chatMessages"></div><div class="chat-input-area"><input type="text" class="chat-input" id="chatInput" placeholder="Type your message..."><button class="chat-send" id="chatSend">→</button></div></div>
+<div class="chatbot-container" id="chatbot"><div class="chat-header"><div class="chat-header-info"><div class="chat-avatar">💬</div><div><h4>AI Growth Assistant</h4><p>Online</p></div></div><button class="chat-close" id="chatClose">✕</button></div><div class="chat-messages" id="chatMessages"></div><div class="chat-input-area"><input type="text" class="chat-input" id="chatInput" placeholder="Type your message..."><button class="chat-send" id="chatSend">→</button></div></div>
 <script src="../js/main.js"></script>'''
 
 def page(title, desc, keywords, body):
@@ -58,11 +58,11 @@ pages["ai-seo.html"] = page(
     "AI SEO Services — Next-Generation Search Optimization",
     "AI-powered SEO services using entity optimization, semantic search, and machine learning. The future of search optimization for USA businesses.",
     "AI SEO services, artificial intelligence SEO, entity SEO, semantic SEO, AI search optimization",
-    '''<section class="page-hero"><div class="container"><span class="section-badge">🤖 AI SEO Services</span><h1>Next-Generation AI-Powered SEO</h1><p>Go beyond traditional SEO. Our AI analyzes 100+ ranking factors across 12 DNA pillars to find optimization opportunities that human analysts miss.</p></div></section>
+    '''<section class="page-hero"><div class="container"><span class="section-badge">🧠 AI SEO Services</span><h1>Next-Generation AI-Powered SEO</h1><p>Go beyond traditional SEO. Our AI analyzes 100+ ranking factors across 12 DNA pillars to find optimization opportunities that human analysts miss.</p></div></section>
 <section class="section section-darker"><div class="container"><div class="services-grid">
 <div class="service-card"><div class="service-icon">🧬</div><h3>DNA-Level SEO Analysis</h3><p>Our AI analyzes your website across 12 DNA pillars and 100+ ranking factors — technical SEO, content quality, entity relationships, semantic coverage, user behavior, and competitor intelligence.</p></div>
 <div class="service-card"><div class="service-icon">🔍</div><h3>Entity & Semantic SEO</h3><p>Build topical authority through entity optimization. We map your semantic graph, identify entity gaps, and create content that establishes your expertise in Google's Knowledge Graph.</p></div>
-<div class="service-card"><div class="service-icon">🤖</div><h3>AI Visibility Optimization</h3><p>Get your business featured in AI search results — ChatGPT, Google Gemini, and Perplexity. We optimize your content for the new era of AI-powered search engines.</p></div>
+<div class="service-card"><div class="service-icon">🧠</div><h3>AI Visibility Optimization</h3><p>Get your business featured in AI search results — ChatGPT, Google Gemini, and Perplexity. We optimize your content for the new era of AI-powered search engines.</p></div>
 <div class="service-card"><div class="service-icon">📊</div><h3>Predictive SEO Analytics</h3><p>Machine learning models predict ranking changes, traffic trends, and competitor movements before they happen — giving you a strategic advantage in your market.</p></div>
 <div class="service-card"><div class="service-icon">✍️</div><h3>AI Content Generation</h3><p>AI-assisted content creation that maintains E-E-A-T quality standards. We generate, optimize, and publish topically relevant content at scale while maintaining your brand voice.</p></div>
 <div class="service-card"><div class="service-icon">⚡</div><h3>Automated Optimization</h3><p>AI continuously monitors your site and automatically identifies technical issues, content gaps, and optimization opportunities — then provides actionable fix recommendations.</p></div>
@@ -80,7 +80,7 @@ pages["ai-seo.html"] = page(
 <div class="industry-card"><div class="icon">🎯</div><h4>Conversion DNA</h4></div>
 <div class="industry-card"><div class="icon">🏆</div><h4>Competitor DNA</h4></div>
 <div class="industry-card"><div class="icon">📑</div><h4>Indexing DNA</h4></div>
-<div class="industry-card"><div class="icon">🤖</div><h4>AI/Programmatic</h4></div>
+<div class="industry-card"><div class="icon">📡</div><h4>AI/Programmatic</h4></div>
 </div></div></section>
 <section class="cta-section"><div class="container"><h2>Experience DNA-Level SEO</h2><p>Get your free AI-powered audit. See what 100+ ranking factors reveal about your website.</p><a href="free-audit.html" class="btn btn-white">Get AI SEO Audit →</a></div></section>'''
 )
@@ -134,7 +134,7 @@ pages["content-creation.html"] = page(
 <div class="service-card"><div class="service-icon">📝</div><h3>SEO Blog Posts</h3><p>Research-backed, long-form articles optimized for target keywords. We cover every content pillar in your niche to build topical authority and drive organic traffic.</p></div>
 <div class="service-card"><div class="service-icon">📱</div><h3>Social Media Content</h3><p>Platform-specific content for Instagram, Facebook, TikTok, and LinkedIn. Captions, graphics, Reels, and Stories designed for maximum engagement.</p></div>
 <div class="service-card"><div class="service-icon">🎬</div><h3>Video Scripts</h3><p>Engaging video scripts for YouTube, TikTok, and Instagram Reels. From educational content to testimonial scripts — optimized for retention and conversion.</p></div>
-<div class="service-card"><div class="service-icon">🤖</div><h3>AI-Powered Content</h3><p>Leverage AI tools for content ideation, drafting, and optimization while maintaining human quality standards and E-E-A-T compliance.</p></div>
+<div class="service-card"><div class="service-icon">🧠</div><h3>AI-Powered Content</h3><p>Leverage AI tools for content ideation, drafting, and optimization while maintaining human quality standards and E-E-A-T compliance.</p></div>
 <div class="service-card"><div class="service-icon">📧</div><h3>Email Campaigns</h3><p>Nurturing email sequences, promotional campaigns, and newsletter content that keeps your audience engaged and drives repeat business.</p></div>
 <div class="service-card"><div class="service-icon">🎨</div><h3>Visual Content</h3><p>Infographics, custom graphics, branded templates, and visual assets that make your content stand out across all platforms.</p></div>
 </div></div></section>
@@ -279,7 +279,7 @@ pages["about.html"] = page(
 <p style="font-size:1.1rem;line-height:1.8;color:#CBD5E1;margin-bottom:32px">Founded in 2024, we've helped over 500 USA local businesses increase their Google visibility, generate more reviews, and grow their customer base. Our month-to-month contracts and transparent reporting ensure we earn your trust every single month.</p>
 <h2 class="section-title mb-24" style="margin-top:60px">Why Choose Us</h2>
 <div class="services-grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr))">
-<div class="service-card" style="text-align:center"><div class="service-icon" style="margin:0 auto 12px">🤖</div><h3>AI-Powered Analysis</h3><p>Our AI analyzes 100+ SEO factors that human analysts miss.</p></div>
+<div class="service-card" style="text-align:center"><div class="service-icon" style="margin:0 auto 12px">🧠</div><h3>AI-Powered Analysis</h3><p>Our AI analyzes 100+ SEO factors that human analysts miss.</p></div>
 <div class="service-card" style="text-align:center"><div class="service-icon" style="margin:0 auto 12px">🇺🇸</div><h3>100% USA-Based</h3><p>Our entire team is based in the United States.</p></div>
 <div class="service-card" style="text-align:center"><div class="service-icon" style="margin:0 auto 12px">📊</div><h3>Transparent Reporting</h3><p>Monthly reports with clear metrics and honest results.</p></div>
 <div class="service-card" style="text-align:center"><div class="service-icon" style="margin:0 auto 12px">🤝</div><h3>No Long-Term Contracts</h3><p>Month-to-month. We earn your business every month.</p></div>
@@ -367,7 +367,7 @@ pages["blog.html"] = page(
 <a href="#" class="service-card"><div class="service-icon">⚖️</div><h3>How Lawyers Get Leads From Google — Complete Guide</h3><p>Legal marketing strategies that generate qualified consultations. SEO, Google Ads, and content marketing for law firms.</p><span class="link">Read Article →</span></a>
 <a href="#" class="service-card"><div class="service-icon">🏢</div><h3>GBP Optimization Guide 2026 — Rank Higher on Maps</h3><p>The definitive guide to Google Business Profile optimization. Every field, every feature, every strategy to maximize your map pack visibility.</p><span class="link">Read Article →</span></a>
 <a href="#" class="service-card"><div class="service-icon">⭐</div><h3>Ethical Review Generation — Get More 5-Star Reviews</h3><p>How to generate authentic customer reviews without violating Google's policies. SMS, email, and QR code strategies that work.</p><span class="link">Read Article →</span></a>
-<a href="#" class="service-card"><div class="service-icon">🤖</div><h3>AI SEO in 2026 — What Local Businesses Need to Know</h3><p>How AI is changing search engine optimization. Entity SEO, semantic search, and AI visibility optimization explained for business owners.</p><span class="link">Read Article →</span></a>
+<a href="#" class="service-card"><div class="service-icon">🧠</div><h3>AI SEO in 2026 — What Local Businesses Need to Know</h3><p>How AI is changing search engine optimization. Entity SEO, semantic search, and AI visibility optimization explained for business owners.</p><span class="link">Read Article →</span></a>
 </div></div></section>'''
 )
 
