@@ -1,529 +1,369 @@
-# AI Growth Labs — Complete Project Tree & Documentation
+# AI Growth Labs — Complete Project Tree & Code Documentation
 
-> **PURPOSE:** This file contains the FULL project structure, every file explained, every function documented,
-> every database table described, and every API endpoint listed. If someone (or an AI agent) needs to understand
-> or continue work on this project, this file alone is enough to get started.
+> **PURPOSE:** Complete project structure, every file explained, every function documented,
+> every database table described, and every API endpoint listed.
 >
-> **Last Updated:** May 2026 | **Total Files:** 85+ | **Total Lines of Code:** ~18,000+
+> **Last Updated:** May 2026 | **Total Files:** 168 | **Total Lines of Code:** ~25,000+
 
 ---
 
-## Table of Contents
-1. [Project Overview](#1-project-overview)
-2. [Complete File Tree](#2-complete-file-tree)
-3. [Tech Stack](#3-tech-stack)
-4. [How to Run](#4-how-to-run)
-5. [Frontend Pages (38+ Pages)](#5-frontend-pages)
-6. [CSS Architecture](#6-css-architecture)
-7. [JavaScript Modules](#7-javascript-modules)
-8. [Backend Dashboard](#8-backend-dashboard)
-9. [Database Schema (27 Tables)](#9-database-schema)
-10. [API Endpoints (99 Endpoints)](#10-api-endpoints)
-11. [Dashboard Templates (16 Templates)](#11-dashboard-templates)
-12. [Form Validation System](#12-form-validation-system)
-13. [SEO Features](#13-seo-features)
-14. [Security Features](#14-security-features)
-15. [API Integrations (9 Integrations)](#15-api-integrations)
-16. [User Roles & Permissions](#16-user-roles)
-17. [Deployment](#17-deployment)
-18. [What's Next (See PROJECT_PLAN.md)](#18-whats-next)
-
----
-
-## 1. Project Overview
-
-**AI Growth Labs** is a full-stack digital marketing agency website with:
-- **Frontend:** Static HTML/CSS/JS website (38+ pages) for a local SEO agency
-- **Backend:** FastAPI dashboard with 99 API endpoints, 27 database tables, and 9 API integrations
-- **Target:** Local businesses across the USA (dentists, lawyers, restaurants, plumbers, etc.)
-- **Specialty:** AI-powered SEO, reputation management, Google Business Profile optimization
-
-### Key URLs:
-| Resource | URL |
-|---|---|
-| Live Frontend | https://ai-growth-labs-part2-final-rdmstqlw.devinapps.com |
-| GitHub Repo | https://github.com/mariadomiguz-a11y/ai-growth-labs-final-3-update |
-| Branch | `devin/1778433837-ai-seo-agency-website` |
-| Git Remote | `neworigin` (use this for pushing, NOT `origin`) |
-
----
-
-## 2. Complete File Tree
+## Directory Structure
 
 ```
-ai-growth-labs-part2-final/
+ai-growth-labs-new/
 │
-├── 📄 index.html                          (646 lines) — Homepage with hero, services grid, industries, stats, CTA
-├── 📄 404.html                            (191 lines) — Custom 404 page with search suggestions
-├── 📄 sitemap.xml                         (37 lines)  — XML sitemap with all page URLs
-├── 📄 robots.txt                          (3 lines)   — Search engine crawl rules
-├── 📄 .gitignore                          (3 lines)   — Git ignore rules
+├── index.html                          # Homepage (869 lines) — hero, services, testimonials, FAQ, footer
+├── 404.html                            # Custom 404 error page
+├── robots.txt                          # Search engine crawler rules
+├── sitemap.xml                         # XML sitemap for SEO
 │
-├── 📁 css/
-│   └── 📄 style.css                       (1193 lines) — Complete site styles, CSS variables, responsive design
+├── css/
+│   └── style.css                       # Main stylesheet (1652 lines) — dark luxury theme, glassmorphism, mega menu
 │
-├── 📁 js/
-│   ├── 📄 main.js                         (127 lines)  — Nav toggle, mobile menu, scroll effects
-│   └── 📄 form-validation.js              (280 lines)  — Phone validation (29 countries), email blocking, rate limiting
+├── js/
+│   ├── main.js                         # Main JS (212 lines) — sticky CTA, counter animation, lazy load, mega menu
+│   └── form-validation.js              # Form validation utility (rate limiting, honeypot, sanitization)
 │
-├── 📁 pages/                              — All inner pages
+├── assets/
+│   └── images/
+│       └── og-default.jpg              # Open Graph image for social sharing (1200x630)
+│
+├── pages/                              # 55 frontend pages
+│   ├── about.html                      # About page with team section
+│   ├── contact.html                    # Contact form + Calendly embed
+│   ├── free-audit.html                 # Free DNA SEO Audit (854 lines) — 16-pillar real crawl audit
+│   ├── blog.html                       # Blog listing page
+│   ├── case-studies.html               # Case studies / portfolio
+│   ├── privacy-policy.html             # Privacy policy
+│   ├── terms.html                      # Terms of service
+│   ├── disclaimer.html                 # Legal disclaimer
 │   │
-│   │── 📄 SERVICE PAGES (10 services):
-│   │   ├── local-seo.html                 (350 lines) — Local SEO services + features
-│   │   ├── gbp-optimization.html          (258 lines) — Google Business Profile optimization
-│   │   ├── reputation-management.html     (270 lines) — Review management & reputation
-│   │   ├── ai-seo.html                    (237 lines) — AI-powered SEO services
-│   │   ├── paid-advertising.html          (234 lines) — Google Ads & Facebook Ads
-│   │   ├── social-media.html              (244 lines) — Social media management
-│   │   ├── content-creation.html          (234 lines) — Blog & content writing
-│   │   ├── video-seo.html                 (233 lines) — Video SEO with pricing ($997/$1,997/$3,497)
-│   │   ├── cro.html                       (234 lines) — Conversion rate optimization
-│   │   └── ecommerce-seo.html             (234 lines) — E-commerce SEO
+│   ├── # ---- SERVICE PAGES (25) ----
+│   ├── local-seo.html                  # Local SEO service
+│   ├── gbp-optimization.html           # Google Business Profile optimization
+│   ├── ai-seo.html                     # AI-powered SEO
+│   ├── geofencing.html                 # Geofencing marketing
+│   ├── geo-optimization.html           # GEO / AI search optimization
+│   ├── paid-advertising.html           # PPC / Google Ads
+│   ├── social-media.html               # Social media management
+│   ├── programmatic-ads.html           # Programmatic advertising
+│   ├── digital-pr.html                 # Digital PR & outreach
+│   ├── influencer-marketing.html       # Influencer marketing
+│   ├── content-creation.html           # Content creation service
+│   ├── video-seo.html                  # Video SEO / YouTube
+│   ├── email-marketing.html            # Email marketing
+│   ├── brand-strategy.html             # Brand strategy
+│   ├── sales-enablement.html           # Sales enablement
+│   ├── analytics-reporting.html        # Analytics & reporting
+│   ├── cro.html                        # Conversion rate optimization
+│   ├── ecommerce-seo.html              # E-commerce SEO
+│   ├── ux-design.html                  # UX/UI design
+│   ├── web-design.html                 # Web design
+│   ├── reputation-management.html      # Reputation management
+│   ├── link-building.html              # Link building
+│   ├── lead-nurture.html               # Lead nurturing
+│   ├── marketing-consulting.html       # Marketing consulting
+│   ├── marketplace-marketing.html      # Marketplace (Amazon/Etsy) marketing
 │   │
-│   │── 📄 INDUSTRY PAGES (12 industries):
-│   │   ├── seo-for-dentists.html          (277 lines)
-│   │   ├── seo-for-lawyers.html           (241 lines)
-│   │   ├── seo-for-restaurants.html       (241 lines)
-│   │   ├── seo-for-plumbers.html          (241 lines)
-│   │   ├── seo-for-hvac.html              (233 lines)
-│   │   ├── seo-for-medical-spas.html      (234 lines)
-│   │   ├── seo-for-real-estate.html       (231 lines)
-│   │   ├── seo-for-gyms.html              (231 lines)
-│   │   ├── seo-for-auto-repair.html       (231 lines)
-│   │   ├── seo-for-electricians.html      (231 lines)
-│   │   ├── seo-for-roofing.html           (231 lines)
-│   │   └── seo-for-pet-services.html      (231 lines)
+│   ├── # ---- INDUSTRY PAGES (22) ----
+│   ├── seo-for-dentists.html
+│   ├── seo-for-chiropractors.html
+│   ├── seo-for-medical-spas.html
+│   ├── seo-for-veterinarians.html
+│   ├── seo-for-salons.html
+│   ├── seo-for-gyms.html
+│   ├── seo-for-lawyers.html
+│   ├── seo-for-financial-advisors.html
+│   ├── seo-for-insurance.html
+│   ├── seo-for-restaurants.html
+│   ├── seo-for-pet-services.html
+│   ├── seo-for-plumbers.html
+│   ├── seo-for-hvac.html
+│   ├── seo-for-electricians.html
+│   ├── seo-for-roofing.html
+│   ├── seo-for-real-estate.html
+│   ├── seo-for-auto-repair.html
+│   ├── seo-for-cleaning.html
+│   ├── seo-for-movers.html
+│   ├── seo-for-landscaping.html
+│   ├── seo-for-photographers.html
+│   └── seo-for-construction.html
+│
+│   ├── # ---- BLOG POSTS (6) ----
+│   └── blog/
+│       ├── ai-seo-chatgpt-citations-2026.html
+│       ├── dentists-google-maps-2026.html
+│       ├── ethical-review-generation-guide.html
+│       ├── gbp-optimization-guide-2026.html
+│       ├── lawyers-more-leads-google.html
+│       └── restaurant-local-seo-2026.html
+│
+├── dashboard/                          # Backend system (FastAPI)
+│   ├── main.py                         # Main backend (3379 lines) — 99+ API endpoints
+│   ├── database.py                     # Database setup (724 lines) — 28 tables, seed data
+│   ├── requirements.txt                # Python dependencies
+│   ├── pyproject.toml                  # Project metadata
+│   ├── agency.db                       # SQLite database file
+│   ├── generate_templates.py           # Template generator utility
 │   │
-│   │── 📄 CORE PAGES:
-│   │   ├── about.html                     (307 lines) — About + LinkedIn skills (27) + services (6 cards)
-│   │   ├── contact.html                   (252 lines) — Contact form with service dropdown + dual CTA
-│   │   ├── free-audit.html                (587 lines) — DNA-Level SEO Audit (12 pillars, PDF/Email export)
-│   │   ├── case-studies.html              (189 lines) — Case studies overview
-│   │   └── blog.html                      (189 lines) — Blog listing page
+│   ├── static/css/
+│   │   └── dashboard.css               # Dashboard stylesheet
 │   │
-│   │── 📄 LEGAL PAGES:
-│   │   ├── privacy-policy.html            (204 lines)
-│   │   ├── terms.html                     (199 lines)
-│   │   └── disclaimer.html                (198 lines)
-│   │
-│   └── 📁 blog/                           — Blog post pages
-│       ├── ai-seo-chatgpt-citations-2026.html      (283 lines)
-│       ├── dentists-google-maps-2026.html           (271 lines)
-│       ├── ethical-review-generation-guide.html     (292 lines)
-│       ├── gbp-optimization-guide-2026.html         (287 lines)
-│       ├── lawyers-more-leads-google.html           (261 lines)
-│       └── restaurant-local-seo-2026.html           (252 lines)
+│   └── templates/                      # 16 Jinja2 dashboard templates
+│       ├── login.html                  # Login page (all 7 roles)
+│       ├── admin_dashboard.html        # Super Admin dashboard
+│       ├── worker_dashboard.html       # Tech SEO / Social Media worker dashboard
+│       ├── sales_dashboard.html        # Sales team dashboard
+│       ├── finance_dashboard.html      # Finance dashboard (payments, expenses, salaries)
+│       ├── ops_dashboard.html          # Operations manager dashboard
+│       ├── client_portal.html          # Client portal dashboard
+│       ├── social_dashboard.html       # Social media dashboard
+│       ├── settings.html               # API Settings & Integrations (admin only)
+│       ├── analytics.html              # Analytics dashboard
+│       ├── performance.html            # Performance metrics
+│       ├── activity_timeline.html      # Activity timeline
+│       ├── rankings_chart.html         # Keyword rankings chart
+│       ├── client_detail.html          # Individual client detail page
+│       ├── monitor.html                # Team monitor / live view
+│       └── team_chat.html              # Internal team chat
 │
-├── 📁 dashboard/                          — FastAPI backend application
-│   ├── 📄 main.py                         (2760 lines) — FastAPI app: 99 endpoints, all routes
-│   ├── 📄 database.py                     (724 lines)  — SQLAlchemy models: 27 tables
-│   ├── 📄 generate_templates.py           (795 lines)  — Script to generate dashboard HTML templates
-│   ├── 📄 requirements.txt               (15 lines)   — Python dependencies
-│   ├── 📄 pyproject.toml                  (16 lines)   — Python project config
-│   ├── 📁 static/css/
-│   │   └── dashboard.css                  (192 lines)  — Dashboard-specific styles
-│   └── 📁 templates/                      (16 templates)
-│       ├── login.html                     (50 lines)
-│       ├── admin_dashboard.html           (207 lines)
-│       ├── client_portal.html             (147 lines)
-│       ├── client_detail.html             (163 lines)
-│       ├── analytics.html                 (101 lines)
-│       ├── finance_dashboard.html         (116 lines)
-│       ├── ops_dashboard.html             (97 lines)
-│       ├── sales_dashboard.html           (76 lines)
-│       ├── performance.html               (69 lines)
-│       ├── rankings_chart.html            (122 lines)
-│       ├── social_dashboard.html          (79 lines)
-│       ├── team_chat.html                 (69 lines)
-│       ├── worker_dashboard.html          (142 lines)
-│       ├── settings.html                  (125 lines)
-│       ├── monitor.html                   (61 lines)
-│       └── activity_timeline.html         (81 lines)
+├── templates/                          # Agency operations templates
+│   ├── index.html                      # Templates listing page
+│   ├── ai-seo-agency-os.html           # Agency operating system overview
+│   ├── client-proposal.html            # Client proposal template
+│   ├── client-reporting.html           # Client reporting template
+│   ├── competitor-styles.html          # Competitor analysis styles
+│   ├── discovery-call.html             # Discovery call script
+│   ├── dna-audit-prompt-level1.html    # DNA audit AI prompt (basic)
+│   ├── dna-audit-prompt-level2.html    # DNA audit AI prompt (advanced)
+│   ├── kickoff-call.html               # Client kickoff call guide
+│   ├── onboarding-form.html            # Client onboarding form
+│   ├── pro-tips-working-patterns.html  # Pro tips & patterns
+│   └── service-*.html                  # Individual service delivery guides (6 files)
 │
-├── 📁 templates/                          — Business operation templates (HTML)
-│   ├── ai-seo-agency-os.html             (478 lines)  — Agency operating system template
-│   ├── client-proposal.html              (236 lines)  — Client proposal generator
-│   ├── client-reporting.html             (242 lines)  — Monthly report template
-│   ├── competitor-styles.html            (263 lines)  — Competitor analysis template
-│   ├── discovery-call.html               (229 lines)  — Discovery call script
-│   ├── dna-audit-prompt-level1.html      (463 lines)  — DNA audit prompt (basic)
-│   ├── dna-audit-prompt-level2.html      (562 lines)  — DNA audit prompt (advanced)
-│   ├── index.html                        (200 lines)  — Templates listing page
-│   ├── kickoff-call.html                 (214 lines)  — Project kickoff template
-│   ├── onboarding-form.html              (211 lines)  — Client onboarding form
-│   ├── pro-tips-working-patterns.html    (386 lines)  — Best practices guide
-│   ├── service-ai-seo.html               (295 lines)  — AI SEO service template
-│   ├── service-content-creation.html     (326 lines)  — Content service template
-│   ├── service-gbp-optimization.html     (261 lines)  — GBP service template
-│   ├── service-paid-ads.html             (278 lines)  — Paid ads service template
-│   ├── service-reputation-management.html(266 lines)  — Reputation service template
-│   └── service-social-media.html         (285 lines)  — Social media service template
+├── # ---- DOCUMENTATION ----
+├── README.md                           # Project overview
+├── API_GUIDE.md                        # Complete API documentation
+├── DATA_TREE.md                        # Database schema documentation
+├── PROJECT_TREE.md                     # This file — complete code tree
+├── DEPLOYMENT_GUIDE.md                 # Deployment instructions
+├── COMPLETE_EXECUTION_GUIDE.md         # Full execution guide
+├── COMPLETE_STRATEGY.md                # Business strategy document
+├── FEASIBILITY_REPORT.md               # Project feasibility analysis
+├── PROGRESS_LOG.md                     # Development progress log
+├── PROJECT_PLAN.md                     # Project plan & timeline
+├── SEO_AUDIT_REPORT.md                 # SEO audit methodology report
 │
-├── 📁 site/                               — Legacy/duplicate folder (older version of site)
-│   ├── index.html, css/, js/, pages/     — Older versions, NOT used in deployment
-│   └── templates/                         — Duplicate of root templates/
-│
-└── 📄 DOCUMENTATION FILES:
-    ├── PROJECT_TREE.md                    — THIS FILE (complete project documentation)
-    ├── PROJECT_PLAN.md                    — Step-by-step build roadmap (phases 1-12)
-    ├── FEASIBILITY_REPORT.md              — Feasibility analysis for all additions
-    ├── PROGRESS_LOG.md                    — Work completion log
-    ├── SEO_AUDIT_REPORT.md                — SEO audit results (38 pages audited)
-    ├── API_GUIDE.md                       — Backend API documentation
-    ├── COMPLETE_EXECUTION_GUIDE.md        — Full execution strategy
-    ├── COMPLETE_STRATEGY.md               — Business strategy document
-    ├── DATA_TREE.md                       — Data structure documentation
-    ├── DEPLOYMENT_GUIDE.md                — Deployment instructions
-    └── README.md                          — Repository readme
+├── generate_pages.py                   # Page generator script (56 pages)
+├── generate_report.py                  # PDF report generator
+└── build-pages.sh                      # Build script for all pages
 ```
 
 ---
 
-## 3. Tech Stack
+## Database Schema (28 Tables)
 
-| Component | Technology |
-|---|---|
-| **Frontend** | HTML5, CSS3 (custom properties), Vanilla JavaScript |
-| **Backend** | Python 3.11, FastAPI, Uvicorn |
-| **Database** | SQLite (via SQLAlchemy ORM) |
-| **Auth** | bcrypt password hashing, JWT tokens, session cookies |
-| **Templating** | Jinja2 (FastAPI templates) |
-| **API Integrations** | OpenAI, Anthropic, Google Gemini, Stripe, Twilio, Google APIs, APScheduler |
-| **Deployment** | Static hosting (DevinApps), Fly.io tunnels for backend |
-| **Version Control** | Git, GitHub |
-
----
-
-## 4. How to Run
-
-### Frontend (Static Site):
-```bash
-cd ai-growth-labs-part2-final
-# Open index.html in a browser, or serve with:
-python -m http.server 8080
-# Then visit http://localhost:8080
-```
-
-### Backend (Dashboard):
-```bash
-cd ai-growth-labs-part2-final/dashboard
-pip install -r requirements.txt
-python -m uvicorn main:app --host 0.0.0.0 --port 8000
-# Dashboard at http://localhost:8000
-# Default login: admin / admin (first-time setup creates tables)
-```
-
-### Git Push:
-```bash
-# IMPORTANT: Use 'neworigin' remote, NOT 'origin'
-git push neworigin devin/1778433837-ai-seo-agency-website
-```
-
-### Deploy Frontend:
-```bash
-# From project root
-deploy frontend --dir /home/ubuntu/ai-growth-labs-part2-final
-```
+| Table | Rows | Key Columns | Purpose |
+|-------|------|-------------|---------|
+| `users` | 10 | id, username, password_hash, role, rank, salary | All system users (7 roles) |
+| `clients` | 7 | id, business_name, email, industry, package, monthly_payment | Client accounts |
+| `projects` | 6 | id, client_id, title, service_type, status, assigned_worker_id | Active projects |
+| `tasks` | 11 | id, project_id, title, status, assigned_to, priority, due_date | Task management |
+| `payments` | 6 | id, client_id, amount, status, due_date, paid_date | Payment tracking |
+| `expenses` | 6 | id, category, description, amount, date | Business expenses |
+| `invoices` | 0 | id, client_id, invoice_number, total, status | Invoice management |
+| `invoice_items` | 0 | id, invoice_id, description, quantity, rate, amount | Line items |
+| `sales_leads` | 3+ | id, business_name, email, source, status | Lead pipeline |
+| `client_reports` | 10 | id, client_id, report_type, report_data, pdf_path | Generated reports |
+| `keyword_rankings` | 1 | id, client_id, keyword, position, search_volume | SEO rankings |
+| `seo_audits` | 0 | id, client_id, website_url, audit_data, overall_score | Stored audits |
+| `api_settings` | 0 | id, provider, api_key, is_active, config_json | API integrations |
+| `function_configs` | 3 | function_name, provider, updated_by | Function→API mapping |
+| `package_tasks` | 82 | id, package, category, title, is_automated | Package task templates |
+| `activity_log` | 1 | id, user_id, action, details, entity_type | Audit trail |
+| `notifications` | 4 | id, user_id, title, message, type, is_read | User notifications |
+| `chat_messages` | 0 | id, session_id, visitor_name, messages, status | AI chat sessions |
+| `team_chats` | 0 | id, from_user_id, to_user_id, message | Internal chat |
+| `social_posts` | 0 | id, client_id, platform, content, status | Social media posts |
+| `time_entries` | 0 | id, user_id, task_id, hours, notes | Time tracking |
+| `contracts` | 0 | id, client_id, title, monthly_value, status | Client contracts |
+| `approval_requests` | 0 | id, task_id, request_type, status | Approval workflow |
+| `suggestions` | 0 | id, user_id, title, description, status | Team suggestions |
+| `client_credentials` | 0 | id, client_id, credential_type, username, password_enc | Client logins |
+| `client_locations` | 0 | id, client_id, location_name, address, gbp_url | Multi-location |
+| `file_attachments` | 0 | id, related_type, filename, filepath | File uploads |
+| `chat_requests` | 0 | id, from_user_id, to_user_id, status | Chat requests |
 
 ---
 
-## 5. Frontend Pages
+## API Endpoints (99+)
 
-### 5.1 Homepage (`index.html` — 646 lines)
-- Hero section with animated stats
-- Services grid (10 service cards, each links to service page)
-- Industries section (12 industry cards, clickable `<a>` tags)
-- Stats section (500+ businesses, 15+ industries, 50+ cities, 94% retention, 10,000+ reviews)
-- CTA section
-- Full nav with Services and Industries dropdown menus
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/login` | Login page |
+| POST | `/login` | Authenticate user |
+| GET | `/logout` | Logout & clear session |
 
-### 5.2 Service Pages (10 pages, ~230-350 lines each)
-Each service page follows this structure:
-1. `<header>` — Nav with dropdowns
-2. `<section class="page-hero">` — Breadcrumb, H1, subtitle, CTA button
-3. `<section class="section">` — Problem/solution content + stats card
-4. `<section class="section section-light">` — Service features grid (4-5 cards)
-5. `<section class="section">` — Pricing (only video-seo.html has this currently)
-6. `<section class="cta-section">` — Final CTA
-7. `<footer>` — Links + social
-8. Floating CTA button
+### Dashboard Pages (Role-based)
+| Method | Endpoint | Access |
+|--------|----------|--------|
+| GET | `/dashboard` | Auto-redirects based on role |
+| GET | `/settings` | Super Admin only |
+| GET | `/analytics` | Admin, Ops Manager |
+| GET | `/performance` | Admin, Ops Manager |
+| GET | `/monitor` | Admin, Ops Manager |
+| GET | `/activity` | Admin |
+| GET | `/team-chat` | All authenticated users |
 
-### 5.3 Industry Pages (12 pages, ~231-277 lines each)
-Same structure as service pages but industry-specific content with:
-- Industry-specific stats
-- Industry pain points
-- Service recommendations
-- Industry-specific CTA
+### Client Management
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/clients` | List all clients |
+| POST | `/api/clients` | Create new client |
+| GET | `/api/clients/{id}` | Get client details |
+| PUT | `/api/clients/{id}` | Update client |
+| GET | `/client/{id}` | Client detail page |
 
-### 5.4 Free Audit Page (`pages/free-audit.html` — 587 lines)
-**Most complex page.** Contains:
-- DNA-Level SEO Audit branding
-- 12 DNA Pillar pills in hero (Technical SEO, On-Page, Content, Entity SEO, Linking, Schema, Media, Social, Security, Mobile, Indexability, Performance)
-- Audit form (business name, website URL, phone, email, industry dropdown, main goal dropdown)
-- Loading animation with progress bar
-- Results section with:
-  - Overall score (circle)
-  - Grade (A-F)
-  - 12 DNA Pillar cards with individual scores and progress bars
-  - Findings per pillar
-- Export buttons: Download PDF, Email Report, Run Another Audit
-- JavaScript: `DNA_PILLARS` array, scoring logic, `downloadPDF()`, `emailReport()`, `runAnother()`
+### Project Management
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/projects` | List projects |
+| POST | `/api/projects` | Create project |
+| PUT | `/api/projects/{id}` | Update project |
 
-### 5.5 Contact Page (`pages/contact.html` — 252 lines)
-- Contact form with: Name, Email, Phone, Service dropdown, Message
-- Form validation (phone + email + rate limiting)
-- Service dropdown options (10 services)
-- Dual CTA section: "Book Free Strategy Call" + "Get Free SEO Audit"
+### Task Management
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/tasks` | List tasks |
+| POST | `/api/tasks` | Create task |
+| PUT | `/api/tasks/{id}` | Update task |
+| PUT | `/api/tasks/{id}/status` | Change task status |
 
-### 5.6 About Page (`pages/about.html` — 307 lines)
-- Company mission
-- Stats card
-- Why Choose Us (4 features)
-- Values section (4 values)
-- "Our Expertise" section with 27 LinkedIn skill tags
-- "Services We Deliver" section with 6 service cards
-- CTA with dual buttons
+### Financial
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/payments` | List payments |
+| POST | `/api/payments` | Record payment |
+| GET | `/api/expenses` | List expenses |
+| POST | `/api/expenses` | Add expense |
+| GET | `/api/invoices` | List invoices |
+| POST | `/api/invoices` | Create invoice |
+| GET | `/api/salaries` | List salaries |
+| GET | `/api/financial-summary` | Summary stats |
+| GET | `/api/export/payments` | CSV export |
 
----
+### SEO & Audit
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/public/free-audit` | **Free DNA audit — 16 pillars, real crawl** |
+| POST | `/api/audit/{client_id}` | Run audit for a client |
+| GET | `/api/rankings/{client_id}` | Keyword rankings |
 
-## 6. CSS Architecture (`css/style.css` — 1193 lines)
+### Reports
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/reports/{client_id}` | List reports |
+| POST | `/api/reports/generate/{client_id}` | Generate report |
+| GET | `/reports/{client_id}/{report_id}` | View report |
 
-### CSS Variables:
-```css
-:root {
-  --navy-900: #0a1628;     /* Dark background */
-  --navy-800: #0d1e36;     /* Slightly lighter */
-  --navy-700: #132743;     /* Card backgrounds */
-  --cyan: #00d4ff;         /* Primary accent */
-  --white: #ffffff;
-  --gray-300: #94a3b8;     /* Muted text */
-  --gray-200: #e2e8f0;     /* Borders */
-}
-```
+### Settings & Integrations
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/settings/api` | List API settings |
+| POST | `/api/settings/api` | Save API key |
+| GET | `/api/settings/function-config` | Get function configs |
+| POST | `/api/settings/function-config` | Save function config |
+| GET | `/api/integrations/status` | Check all integration statuses |
 
-### Key CSS classes:
-- `.container` — max-width: 1200px, centered
-- `.section` — padding: 80px 0
-- `.section-light` — light gray background
-- `.page-hero` — dark navy hero section
-- `.service-grid` — CSS grid, 3 columns
-- `.stat-card` — stats display with large numbers
-- `.pricing-grid` — 3-column pricing layout
-- `.pricing-card.featured` — highlighted middle tier
-- `.btn` — primary button (cyan bg)
-- `.btn-outline` — outlined button
-- `.btn-white` — white button
-- `.floating-cta` — fixed bottom-right button
-- `.skill-tag` — inline tag pill for skills
-- `.dna-pill` — DNA pillar pill in audit page
-- `.breadcrumb` — breadcrumb navigation
+### Communication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/team-chat` | Get chat messages |
+| POST | `/api/team-chat` | Send chat message |
+| GET | `/api/notifications` | Get notifications |
+| PUT | `/api/notifications/{id}/read` | Mark as read |
+| POST | `/api/chat/sessions` | Create AI chat session |
 
----
-
-## 7. JavaScript Modules
-
-### 7.1 `js/main.js` (127 lines)
-- Mobile menu toggle
-- Dropdown menu hover/click behavior
-- Smooth scroll to sections
-- Nav scroll effect (add shadow on scroll)
-
-### 7.2 `js/form-validation.js` (280 lines)
-**Critical module — do NOT modify without understanding.**
-
-#### Phone Validation (28 countries):
-```javascript
-COUNTRY_RULES = {
-  '+1': { country: 'USA/Canada', digits: 10 },
-  '+44': { country: 'UK', digits: 10 },
-  '+971': { country: 'UAE', digits: 9 },
-  // ... 25 more countries
-  // NOTE: +92 (Pakistan) was REMOVED per user request
-}
-```
-- Default placeholder: `+971 5X XXX XXXX` (UAE)
-- Validates digit count after stripping country code
-- Shows specific error: "Phone number too short/too long for [country]. Expected X digits."
-
-#### Email Validation:
-- Format check (regex)
-- Disposable domain blocking:
-```javascript
-BLOCKED_DOMAINS = [
-  'tempmail.com', 'throwaway.email', 'guerrillamail.com', 'mailinator.com',
-  'trashmail.com', 'yopmail.com', 'sharklasers.com', 'guerrillamail.info',
-  'grr.la', 'tempail.com', 'temp-mail.org', 'fakeinbox.com', 'maildrop.cc',
-  'dispostable.com', '10minutemail.com', 'getnada.com'
-]
-```
-
-#### Rate Limiting:
-- Uses `localStorage`
-- Key format: `form_submissions_[formId]`
-- Max 3 submissions per form per 24 hours
-- Shows countdown: "You have reached the maximum of 3 submissions per day. Please try again in X hours."
+### Public (No Login)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/public/free-audit` | Free SEO audit |
+| POST | `/api/public/contact` | Contact form submission |
 
 ---
 
-## 8. Backend Dashboard (`dashboard/`)
+## User Roles & Access
 
-### 8.1 `main.py` (2760 lines) — FastAPI Application
-
-#### Key Features:
-- 99 API endpoints
-- JWT authentication
-- Role-based access control (11 roles)
-- 9 external API integrations
-- Template rendering with Jinja2
-
-#### Route Groups:
-| Group | Routes | Description |
-|---|---|---|
-| Auth | `/login`, `/logout`, `/register` | User authentication |
-| Dashboard | `/dashboard`, `/admin`, `/ops`, `/sales`, `/finance` | Role-based dashboards |
-| Clients | `/api/clients/*` | Client CRUD operations |
-| Projects | `/api/projects/*` | Project management |
-| Tasks | `/api/tasks/*` | Task tracking |
-| Analytics | `/api/analytics/*` | Performance data |
-| Rankings | `/api/rankings/*` | SEO ranking tracking |
-| Reviews | `/api/reviews/*` | Review management |
-| Invoices | `/api/invoices/*` | Billing & invoicing |
-| AI | `/api/ai/*` | AI content generation |
-| Reports | `/api/reports/*` | Automated reporting |
-| Settings | `/api/settings/*` | System configuration |
-
-### 8.2 `database.py` (724 lines) — SQLAlchemy Models
-
-#### 27 Database Tables:
-| # | Table | Key Columns | Description |
-|---|---|---|---|
-| 1 | `users` | id, email, password_hash, role | System users |
-| 2 | `clients` | id, name, email, phone, business_name | Client records |
-| 3 | `projects` | id, client_id, name, status, start_date | Active projects |
-| 4 | `tasks` | id, project_id, title, status, assigned_to | Task items |
-| 5 | `invoices` | id, client_id, amount, status, due_date | Billing records |
-| 6 | `payments` | id, invoice_id, amount, payment_date | Payment tracking |
-| 7 | `rankings` | id, project_id, keyword, position, date | SEO rankings |
-| 8 | `reviews` | id, client_id, platform, rating, text | Online reviews |
-| 9 | `analytics` | id, project_id, metric, value, date | Analytics data |
-| 10 | `reports` | id, project_id, type, data, created_at | Generated reports |
-| 11 | `content` | id, project_id, type, title, body | Content pieces |
-| 12 | `social_posts` | id, project_id, platform, content, scheduled_at | Social media posts |
-| 13 | `campaigns` | id, project_id, name, budget, status | Ad campaigns |
-| 14 | `leads` | id, source, name, email, phone, status | Lead tracking |
-| 15 | `contacts` | id, client_id, name, email, role | Client contacts |
-| 16 | `notes` | id, entity_type, entity_id, text | Internal notes |
-| 17 | `files` | id, project_id, filename, path | File attachments |
-| 18 | `time_entries` | id, task_id, user_id, hours, date | Time tracking |
-| 19 | `notifications` | id, user_id, message, read, created_at | System notifications |
-| 20 | `audit_log` | id, user_id, action, details, timestamp | Audit trail |
-| 21 | `seo_audits` | id, url, results, score, created_at | SEO audit results |
-| 22 | `keywords` | id, project_id, keyword, volume, difficulty | Keyword research |
-| 23 | `backlinks` | id, project_id, url, domain_authority | Backlink tracking |
-| 24 | `competitors` | id, project_id, name, url, notes | Competitor tracking |
-| 25 | `templates` | id, name, type, content | Report templates |
-| 26 | `settings` | id, key, value | System settings |
-| 27 | `chat_messages` | id, sender_id, receiver_id, message | Internal messaging |
+| Role | Username | Password | Dashboard Access |
+|------|----------|----------|-----------------|
+| Super Admin | admin | admin123 | Everything — clients, projects, tasks, payments, analytics, settings, team |
+| Tech SEO Worker | sarah_k | password123 | Kanban board, time tracker, assigned projects, SEO audit tools |
+| Sales | lisa_c | password123 | Lead pipeline, proposals, client list, sales metrics |
+| Social Media | marcus_j | password123 | Social posts, tasks, assigned projects |
+| Finance | rachel_g | password123 | Payments, expenses, salaries, invoices, CSV export, reports |
+| Ops Manager | ops_manager | password123 | Team workload, all projects, tasks, performance metrics |
+| Client Portal | client_chen | password123 | Own projects, task progress, rankings, reports |
 
 ---
 
-## 9. SEO Features (Already Implemented)
+## Free DNA Audit — 16 Pillars (All AI Automated)
 
-### On Every Page:
-- `<title>` — 50-65 characters, keyword optimized
-- `<meta name="description">` — 150-160 characters
-- `<meta property="og:title">` — OpenGraph title
-- `<meta property="og:description">` — OpenGraph description
-- `<meta property="og:image">` — OpenGraph image
-- `<meta property="og:url">` — Canonical URL
-- `<meta name="twitter:card">` — Twitter card type
-- `<link rel="canonical">` — Canonical URL
-- `<link rel="alternate" hreflang="en-us">` — Language tag
-- `<meta name="keywords">` — Target keywords
-- Breadcrumb schema (JSON-LD) on service/industry pages
-- LocalBusiness schema (JSON-LD) with 10 `serviceType` entries
+The free audit performs a **real website crawl** and checks 16 categories:
 
-### Site-Level:
-- `sitemap.xml` — 37+ URLs
-- `robots.txt` — Allow all, sitemap reference
-- `404.html` — Custom 404 page
-- Internal linking between pages
-- External authority links in blog posts
+| # | Pillar | What It Checks |
+|---|--------|----------------|
+| 1 | Technical SEO | Title tag, meta description, H1/H2/H3, canonical, robots.txt, sitemap, language |
+| 2 | On-Page SEO | Internal/external links, images, alt text, favicon, broken links |
+| 3 | Content Quality | Word count, forms, phone/email presence, content depth |
+| 4 | Schema & JSON-LD | Structured data blocks, schema types (LocalBusiness, Organization, etc.) |
+| 5 | Social Media SEO | Open Graph tags (title, description, image) |
+| 6 | Security & SSL | HTTPS, security headers (CSP, HSTS, X-Frame, etc.) |
+| 7 | Performance | Server response time, HTML size, JS/CSS file count |
+| 8 | Mobile Readiness | Viewport meta tag, responsive CSS (@media queries) |
+| 9 | Core Web Vitals | Render-blocking JS/CSS, images without dimensions, preload hints, inline handlers |
+| 10 | AI Crawler Access | GPTBot, ClaudeBot, ChatGPT-User, Google-Extended, PerplexityBot blocking check |
+| 11 | Image Alt Text & WebP | Image format breakdown (JPG/PNG/WebP/AVIF), alt text coverage |
+| 12 | XML Sitemap Validation | Sitemap exists, URL count, lastmod dates, priority tags |
+| 13 | Robots.txt Check | Exists, sitemap reference, crawl-delay, disallow rule count |
+| 14 | Internal Linking Depth | Nav links, footer links, body links, link-to-text ratio |
+| 15 | Canonical Mismatch | Domain mismatch, protocol mismatch, path mismatch detection |
+| 16 | E-E-A-T Author Signals | Author attribution, about page, contact info, social proof, credentials |
 
----
-
-## 10. Security Features
-
-| Feature | Implementation |
-|---|---|
-| Phone validation | 28 country-specific digit validation |
-| Email blocking | 16 disposable email domains blocked |
-| Rate limiting | Max 3 form submissions per 24 hours (localStorage) |
-| XSS prevention | Input sanitization on forms |
-| CSRF tokens | Backend form submissions |
-| Password hashing | bcrypt |
-| JWT auth | Dashboard API authentication |
-| Input validation | Server-side validation on all API endpoints |
+### Report Output Categories
+- **🤖 AI Automated Tasks** — Tasks AI handles automatically (no login needed)
+- **👨‍💻 Human Action Required** — Tasks needing content creation or design decisions
+- **🔑 Login Credentials Required** — Tasks requiring third-party API keys (with links where to get them)
 
 ---
 
-## 11. API Integrations (Backend)
+## Design System (2026 Dark Luxury)
 
-| # | Service | Purpose | Env Variable |
-|---|---|---|---|
-| 1 | OpenAI (GPT) | AI content generation | `OPENAI_API_KEY` |
-| 2 | Anthropic (Claude) | Alternative AI provider | `ANTHROPIC_API_KEY` |
-| 3 | Google Gemini | Google AI features | `GOOGLE_API_KEY` |
-| 4 | Stripe | Payment processing | `STRIPE_SECRET_KEY` |
-| 5 | Twilio | SMS/call features | `TWILIO_SID`, `TWILIO_TOKEN` |
-| 6 | Google Business | GBP API integration | `GOOGLE_BUSINESS_KEY` |
-| 7 | Google Analytics | Analytics data | `GA_KEY` |
-| 8 | APScheduler | Background task scheduling | Built-in |
-| 9 | SendGrid | Email delivery | `SENDGRID_API_KEY` |
-
----
-
-## 12. Deployment
-
-### Frontend Deployment:
-```bash
-# Deploy to DevinApps (static hosting)
-deploy frontend --dir /home/ubuntu/ai-growth-labs-part2-final
-# Result: https://ai-growth-labs-part2-final-rdmstqlw.devinapps.com
-```
-
-### Backend Deployment:
-```bash
-cd /home/ubuntu/ai-growth-labs-part2-final/dashboard
-pip install -r requirements.txt
-python -m uvicorn main:app --host 0.0.0.0 --port 8000
-# Then expose with tunnel for public access
-```
-
-### Git Workflow:
-```bash
-# Always use 'neworigin' remote (not 'origin')
-git add [files]
-git commit -m "feat: description"
-git push neworigin devin/1778433837-ai-seo-agency-website
-```
+| Property | Value |
+|----------|-------|
+| Primary BG | `#050810` (deep space black) |
+| Secondary BG | `#0A0F1E` (dark navy) |
+| Card BG | `#0F1629` |
+| Accent Primary | `#00D4FF` (electric cyan) |
+| Accent Secondary | `#7B2FFF` (deep violet) |
+| Accent Glow | `#00FF88` (neon green) |
+| Display Font | Cabinet Grotesk (via Fontshare) |
+| Body Font | Satoshi (via Fontshare) |
+| Mono Font | JetBrains Mono |
+| Icons | 47 premium gradient dual-tone SVGs (inline) |
 
 ---
 
-## 13. What's Next
+## API Integrations (9 Providers)
 
-See **PROJECT_PLAN.md** for the complete 12-phase roadmap:
-- Phase 1: 15 new service pages (Email Marketing, Web Design, GEO, Geofencing, etc.)
-- Phase 2: 10 new industry pages (Cleaning, Moving, Insurance, etc.)
-- Phase 3: Pricing tiers on all service pages
-- Phase 4: Testimonials, trust badges, phone number, FAQs
-- Phase 5-6: 50 blog posts
-- Phase 7: Detailed case studies
-- Phase 8: Free tools (ROI calculator, meta tag generator)
-- Phase 9-12: Dashboard enhancements (client portal, CRM, AI tracking)
-
-See **FEASIBILITY_REPORT.md** for time estimates and risk assessment.
-
----
-
-*This documentation is self-contained. Any AI agent or developer can read this file and understand the entire project.*
+| Provider | Purpose | Cost |
+|----------|---------|------|
+| Claude AI | SEO audits, content generation, competitor analysis | ~$0.003/1K tokens |
+| ChatGPT | Same as Claude (alternative) | ~$0.002/1K tokens |
+| Google Gemini | Same as Claude (alternative) | Free tier available |
+| SMTP (Gmail) | Email reports, notifications | Free (Gmail App Password) |
+| Twilio | Voice calls, SMS, AI voice agent | $1/mo + per-call |
+| WhatsApp Business | Client messaging, report sharing | Free (Meta Business account) |
+| Slack | Team notifications | Free |
+| Stripe | Billing, invoicing, subscriptions | 2.9% + 30¢/txn |
+| Google Search Console | Real keyword rankings, click/impression data | Free (OAuth setup) |
