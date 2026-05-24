@@ -2740,6 +2740,131 @@ def _real_crawl_audit(url, business_name, industry, city):
     # ---- RESPONSIVE CSS ----
     results["has_media_queries"] = "@media" in html
 
+    # ---- CORE WEB VITALS INDICATORS ----
+    # LCP: check for large images/videos above fold, render-blocking resources
+    lcp_issues = []
+    preloads = soup.find_all("link", rel="preload")
+    results["has_preload_hints"] = len(preloads) > 0
+    # Check for render-blocking CSS (non-async)
+    blocking_css = [l for l in soup.find_all("link", rel="stylesheet") if not l.get("media") or l.get("media") == "all"]
+    results["blocking_css_count"] = len(blocking_css)
+    # Check for render-blocking JS (no defer/async)
+    blocking_js = [s for s in soup.find_all("script", src=True) if not s.get("defer") and not s.get("async")]
+    results["blocking_js_count"] = len(blocking_js)
+    # CLS indicators: images without width/height
+    imgs_no_dimensions = [i for i in imgs if not (i.get("width") and i.get("height"))]
+    results["images_no_dimensions"] = len(imgs_no_dimensions)
+    # INP: check for heavy event handlers (heuristic)
+    inline_handlers = len(re.findall(r'on(?:click|change|submit|keydown|mouseover)=', html, re.I))
+    results["inline_event_handlers"] = inline_handlers
+
+    # ---- AI CRAWLER ACCESS CHECK ----
+    ai_crawlers = {}
+    robots_content = results.get("robots_txt_content", "") or ""
+    for bot in ["GPTBot", "ClaudeBot", "Claude-Web", "ChatGPT-User", "Google-Extended", "CCBot", "PerplexityBot", "Bingbot", "anthropic-ai"]:
+        bot_lower = bot.lower()
+        # Check if bot is specifically blocked
+        blocked = False
+        in_section = False
+        for line in robots_content.split("\n"):
+            line_stripped = line.strip().lower()
+            if line_stripped.startswith("user-agent:"):
+                agent = line_stripped.replace("user-agent:", "").strip()
+                in_section = (agent == bot_lower or agent == "*")
+            elif in_section and line_stripped.startswith("disallow:"):
+                path = line_stripped.replace("disallow:", "").strip()
+                if path == "/" or path == "/*":
+                    blocked = True
+        ai_crawlers[bot] = {"blocked": blocked}
+    results["ai_crawlers"] = ai_crawlers
+
+    # ---- IMAGE WebP AUDIT ----
+    img_formats = {"webp": 0, "jpg": 0, "jpeg": 0, "png": 0, "gif": 0, "svg": 0, "avif": 0, "other": 0}
+    for img in imgs:
+        src = (img.get("src") or img.get("data-src") or "").lower()
+        ext = src.rsplit(".", 1)[-1].split("?")[0] if "." in src else "other"
+        if ext in img_formats:
+            img_formats[ext] = img_formats.get(ext, 0) + 1
+        else:
+            img_formats["other"] += 1
+    results["image_formats"] = img_formats
+    results["webp_usage_pct"] = round((img_formats.get("webp", 0) + img_formats.get("avif", 0)) / max(len(imgs), 1) * 100)
+
+    # ---- XML SITEMAP VALIDATION (deep) ----
+    sitemap_details = {"exists": results.get("has_sitemap", False), "url_count": 0, "has_lastmod": False, "has_priority": False}
+    if results.get("has_sitemap") and results.get("sitemap_url"):
+        try:
+            sm_resp = req.get(results["sitemap_url"], headers=headers, timeout=8)
+            if sm_resp.status_code == 200:
+                sm_soup = BeautifulSoup(sm_resp.text, "lxml")
+                sm_urls = sm_soup.find_all("url") or sm_soup.find_all("loc")
+                sitemap_details["url_count"] = len(sm_urls)
+                sitemap_details["has_lastmod"] = bool(sm_soup.find("lastmod"))
+                sitemap_details["has_priority"] = bool(sm_soup.find("priority"))
+        except:
+            pass
+    results["sitemap_details"] = sitemap_details
+
+    # ---- ROBOTS.TXT VALIDATION (deep) ----
+    robots_details = {"exists": results.get("has_robots_txt", False), "has_sitemap_ref": False, "has_crawl_delay": False, "disallow_count": 0}
+    if robots_content:
+        robots_details["has_sitemap_ref"] = "sitemap:" in robots_content.lower()
+        robots_details["has_crawl_delay"] = "crawl-delay:" in robots_content.lower()
+        robots_details["disallow_count"] = robots_content.lower().count("disallow:")
+    results["robots_details"] = robots_details
+
+    # ---- INTERNAL LINKING DEPTH ----
+    nav_links = soup.find_all("nav")
+    nav_link_count = sum(len(n.find_all("a", href=True)) for n in nav_links) if nav_links else 0
+    footer_tag = soup.find("footer")
+    footer_link_count = len(footer_tag.find_all("a", href=True)) if footer_tag else 0
+    main_content = soup.find("main") or soup.find("article") or soup.find("div", class_=re.compile(r"content|main|body", re.I))
+    body_link_count = len(main_content.find_all("a", href=True)) if main_content else results.get("internal_links", 0) - nav_link_count - footer_link_count
+    results["linking_structure"] = {
+        "nav_links": nav_link_count,
+        "footer_links": footer_link_count,
+        "body_links": max(body_link_count, 0),
+        "total_internal": results.get("internal_links", 0),
+        "link_to_text_ratio": round(results.get("internal_links", 0) / max(results.get("word_count", 1), 1) * 100, 2)
+    }
+
+    # ---- CANONICAL MISMATCH DETECTION ----
+    canonical_issues = []
+    if results.get("has_canonical"):
+        canon = results.get("canonical_url", "")
+        final = results.get("final_url", url)
+        # Check if canonical matches actual URL
+        if canon and final:
+            canon_parsed = urlparse(canon)
+            final_parsed = urlparse(final)
+            if canon_parsed.netloc and final_parsed.netloc and canon_parsed.netloc != final_parsed.netloc:
+                canonical_issues.append(f"Domain mismatch: canonical={canon_parsed.netloc}, actual={final_parsed.netloc}")
+            if canon_parsed.scheme != final_parsed.scheme:
+                canonical_issues.append(f"Protocol mismatch: canonical={canon_parsed.scheme}, actual={final_parsed.scheme}")
+            if canon.rstrip("/") != final.rstrip("/") and canon_parsed.netloc == final_parsed.netloc:
+                canonical_issues.append(f"Path mismatch: canonical={canon}, actual={final}")
+    results["canonical_issues"] = canonical_issues
+
+    # ---- E-E-A-T AUTHOR SIGNALS ----
+    eeat_signals = {"has_author": False, "has_about_page": False, "has_contact_info": False, "has_social_proof": False, "has_credentials": False}
+    # Check for author tags
+    author_meta = soup.find("meta", attrs={"name": "author"})
+    author_rel = soup.find("a", rel="author")
+    author_schema = "Person" in str(results.get("schema_types", []))
+    eeat_signals["has_author"] = bool(author_meta or author_rel or author_schema)
+    # Check for about/team page links
+    about_links = [a for a in all_links if any(kw in (a.get("href", "").lower()) for kw in ["about", "team", "our-team", "staff"])]
+    eeat_signals["has_about_page"] = len(about_links) > 0
+    # Contact info presence
+    eeat_signals["has_contact_info"] = bool(results.get("phones_found") or results.get("emails_found"))
+    # Social proof (testimonials, reviews)
+    testimonial_indicators = len(re.findall(r'testimonial|review|rating|stars|client.?said|customer.?feedback', html, re.I))
+    eeat_signals["has_social_proof"] = testimonial_indicators > 0
+    # Credentials indicators
+    credential_indicators = len(re.findall(r'certified|accredited|licensed|award|partner|member|association|BBB|chamber', html, re.I))
+    eeat_signals["has_credentials"] = credential_indicators > 0
+    results["eeat_signals"] = eeat_signals
+
     return results
 
 
@@ -2921,27 +3046,228 @@ def _build_audit_from_crawl(crawl, business_name, industry, city, url):
     else: mobile_findings.append("Responsive CSS: Not clearly detected"); mobile_recs.append("Ensure CSS uses @media queries for responsive design")
     mobile_score = min(mobile_score, 100)
 
-    # Build sections
+    # 9. Core Web Vitals
+    cwv_score = 40
+    cwv_findings = []
+    cwv_recs = []
+    cwv_findings.append(f"Render-blocking CSS: {crawl.get('blocking_css_count', 0)} files")
+    cwv_findings.append(f"Render-blocking JS: {crawl.get('blocking_js_count', 0)} files (no defer/async)")
+    if crawl.get("blocking_js_count", 0) == 0: cwv_score += 15
+    elif crawl.get("blocking_js_count", 0) <= 2: cwv_score += 8
+    else: cwv_recs.append(f"Add defer/async to {crawl['blocking_js_count']} render-blocking scripts to improve LCP")
+    if crawl.get("blocking_css_count", 0) <= 2: cwv_score += 10
+    else: cwv_recs.append(f"Reduce {crawl['blocking_css_count']} blocking CSS files — inline critical CSS or use media queries")
+    cwv_findings.append(f"Images without width/height: {crawl.get('images_no_dimensions', 0)}")
+    if crawl.get("images_no_dimensions", 0) == 0: cwv_score += 15
+    elif crawl.get("images_no_dimensions", 0) <= 3: cwv_score += 8
+    else: cwv_recs.append(f"Add explicit width/height to {crawl['images_no_dimensions']} images to prevent CLS (layout shift)")
+    if crawl.get("has_preload_hints"): cwv_score += 10; cwv_findings.append("Resource preload hints: Found")
+    else: cwv_findings.append("Resource preload hints: Not found"); cwv_recs.append("Add <link rel='preload'> for critical fonts/images to improve LCP")
+    cwv_findings.append(f"Inline event handlers: {crawl.get('inline_event_handlers', 0)}")
+    if crawl.get("inline_event_handlers", 0) <= 5: cwv_score += 10
+    else: cwv_recs.append(f"Move {crawl['inline_event_handlers']} inline event handlers to external JS for better INP")
+    cwv_score = min(cwv_score, 100)
+
+    # 10. GEO / AI Crawler Access
+    geo_score = 50
+    geo_findings = []
+    geo_recs = []
+    ai_crawlers = crawl.get("ai_crawlers", {})
+    blocked_bots = [bot for bot, info in ai_crawlers.items() if info.get("blocked")]
+    allowed_bots = [bot for bot, info in ai_crawlers.items() if not info.get("blocked")]
+    if blocked_bots:
+        geo_findings.append(f"BLOCKED AI crawlers: {', '.join(blocked_bots)}")
+        geo_recs.append(f"Unblock {', '.join(blocked_bots)} in robots.txt to appear in AI search results (ChatGPT, Claude, Perplexity)")
+    else:
+        geo_score += 25
+        geo_findings.append("No AI crawlers explicitly blocked")
+    if allowed_bots:
+        geo_findings.append(f"Allowed AI crawlers: {', '.join(allowed_bots)}")
+        geo_score += min(len(allowed_bots) * 3, 25)
+    if not crawl.get("has_robots_txt"):
+        geo_findings.append("No robots.txt found — all bots have default access")
+        geo_score += 10
+    # Check if site has clear entity/brand info for AI understanding
+    if crawl.get("schema_count", 0) > 0: geo_score += 10; geo_findings.append("Schema markup helps AI crawlers understand your business")
+    else: geo_recs.append("Add schema markup so AI models accurately represent your business")
+    geo_score = min(geo_score, 100)
+
+    # 11. Image Alt Text + WebP Audit
+    img_audit_score = 40
+    img_findings = []
+    img_recs = []
+    total_imgs = crawl.get("total_images", 0)
+    no_alt = crawl.get("images_no_alt", 0)
+    formats = crawl.get("image_formats", {})
+    webp_pct = crawl.get("webp_usage_pct", 0)
+    img_findings.append(f"Total images: {total_imgs}")
+    img_findings.append(f"Images missing alt text: {no_alt}/{total_imgs}")
+    if total_imgs > 0 and no_alt == 0: img_audit_score += 25
+    elif no_alt <= 3: img_audit_score += 15
+    else: img_recs.append(f"Add descriptive alt text to {no_alt} images — critical for SEO and accessibility")
+    img_findings.append(f"Image formats: JPG={formats.get('jpg',0)+formats.get('jpeg',0)}, PNG={formats.get('png',0)}, WebP={formats.get('webp',0)}, SVG={formats.get('svg',0)}, AVIF={formats.get('avif',0)}")
+    img_findings.append(f"Modern format usage (WebP/AVIF): {webp_pct}%")
+    if webp_pct >= 50: img_audit_score += 25
+    elif webp_pct >= 20: img_audit_score += 15
+    else: img_recs.append(f"Convert images to WebP format — only {webp_pct}% use modern formats (target 80%+)")
+    if total_imgs > 0 and total_imgs <= 30: img_audit_score += 10
+    elif total_imgs > 50: img_recs.append(f"{total_imgs} images found — consider lazy loading images below the fold")
+    img_audit_score = min(img_audit_score, 100)
+
+    # 12. XML Sitemap Validation
+    sitemap_score = 30
+    sitemap_findings = []
+    sitemap_recs = []
+    sm_details = crawl.get("sitemap_details", {})
+    if sm_details.get("exists"):
+        sitemap_score += 25
+        sitemap_findings.append(f"XML Sitemap: Found ({sm_details.get('url_count', 0)} URLs)")
+        if sm_details.get("url_count", 0) > 0: sitemap_score += 10
+        else: sitemap_recs.append("Sitemap exists but contains no URLs — regenerate it")
+        if sm_details.get("has_lastmod"): sitemap_score += 15; sitemap_findings.append("Last modified dates: Present")
+        else: sitemap_findings.append("Last modified dates: Missing"); sitemap_recs.append("Add <lastmod> dates to sitemap entries for better crawl prioritization")
+        if sm_details.get("has_priority"): sitemap_score += 10; sitemap_findings.append("Priority tags: Present")
+        else: sitemap_findings.append("Priority tags: Missing"); sitemap_recs.append("Add <priority> tags to indicate page importance")
+    else:
+        sitemap_findings.append("XML Sitemap: NOT FOUND")
+        sitemap_recs.append("Create an XML sitemap and submit it to Google Search Console")
+        sitemap_recs.append("Use a sitemap generator plugin or tool (Yoast, Screaming Frog, etc.)")
+    sitemap_score = min(sitemap_score, 100)
+
+    # 13. Robots.txt Check
+    robots_score = 30
+    robots_findings = []
+    robots_recs = []
+    rb_details = crawl.get("robots_details", {})
+    if rb_details.get("exists"):
+        robots_score += 25
+        robots_findings.append("Robots.txt: Found")
+        robots_findings.append(f"Disallow rules: {rb_details.get('disallow_count', 0)}")
+        if rb_details.get("has_sitemap_ref"): robots_score += 20; robots_findings.append("Sitemap reference: Present")
+        else: robots_findings.append("Sitemap reference: Missing"); robots_recs.append("Add Sitemap: directive in robots.txt pointing to your sitemap.xml")
+        if rb_details.get("has_crawl_delay"): robots_findings.append("Crawl-delay: Set"); robots_recs.append("Consider removing Crawl-delay — it slows indexing")
+        else: robots_score += 10
+        if rb_details.get("disallow_count", 0) > 10: robots_recs.append(f"Too many Disallow rules ({rb_details['disallow_count']}) — review for over-blocking")
+        else: robots_score += 15
+    else:
+        robots_findings.append("Robots.txt: NOT FOUND")
+        robots_recs.append("Create a robots.txt file at your domain root")
+        robots_recs.append("Include sitemap reference and allow all important crawlers")
+    robots_score = min(robots_score, 100)
+
+    # 14. Internal Linking Depth
+    linking_score = 40
+    linking_findings = []
+    linking_recs = []
+    ls = crawl.get("linking_structure", {})
+    linking_findings.append(f"Navigation links: {ls.get('nav_links', 0)}")
+    linking_findings.append(f"Footer links: {ls.get('footer_links', 0)}")
+    linking_findings.append(f"Body/content links: {ls.get('body_links', 0)}")
+    linking_findings.append(f"Total internal links: {ls.get('total_internal', 0)}")
+    linking_findings.append(f"Link-to-text ratio: {ls.get('link_to_text_ratio', 0)}%")
+    total_int = ls.get("total_internal", 0)
+    if total_int >= 20: linking_score += 20
+    elif total_int >= 10: linking_score += 12
+    else: linking_recs.append(f"Only {total_int} internal links — add more contextual links between pages")
+    body_links = ls.get("body_links", 0)
+    if body_links >= 5: linking_score += 15
+    elif body_links >= 2: linking_score += 8
+    else: linking_recs.append("Add more in-content links to service/industry pages for better page authority flow")
+    if ls.get("nav_links", 0) >= 10: linking_score += 10
+    else: linking_recs.append("Expand navigation to include more key service pages")
+    ltr = ls.get("link_to_text_ratio", 0)
+    if 1 <= ltr <= 10: linking_score += 15
+    elif ltr > 10: linking_recs.append("Link-to-text ratio is high — add more content to balance")
+    linking_score = min(linking_score, 100)
+
+    # 15. Canonical Mismatch Detection
+    canon_score = 50
+    canon_findings = []
+    canon_recs = []
+    canon_issues = crawl.get("canonical_issues", [])
+    if crawl.get("has_canonical"):
+        canon_score += 20
+        canon_findings.append(f"Canonical tag: Present ({crawl.get('canonical_url', '')})")
+        if not canon_issues:
+            canon_score += 30
+            canon_findings.append("Canonical URL: Matches page URL — No mismatches detected")
+        else:
+            for issue in canon_issues:
+                canon_findings.append(f"ISSUE: {issue}")
+            canon_recs.append("Fix canonical URL mismatch — this can cause duplicate content issues")
+            canon_recs.append(f"Canonical should point to: {crawl.get('final_url', url)}")
+    else:
+        canon_findings.append("Canonical tag: NOT FOUND")
+        canon_recs.append("Add <link rel='canonical'> tag to prevent duplicate content indexing")
+        canon_recs.append("Self-referencing canonicals help Google determine the preferred URL version")
+    canon_score = min(canon_score, 100)
+
+    # 16. E-E-A-T Author Signals
+    eeat_score = 20
+    eeat_findings = []
+    eeat_recs = []
+    eeat = crawl.get("eeat_signals", {})
+    if eeat.get("has_author"): eeat_score += 15; eeat_findings.append("Author attribution: Found")
+    else: eeat_findings.append("Author attribution: NOT FOUND"); eeat_recs.append("Add author names to content — use <meta name='author'> and author schema")
+    if eeat.get("has_about_page"): eeat_score += 15; eeat_findings.append("About/Team page: Referenced")
+    else: eeat_findings.append("About/Team page: No link found"); eeat_recs.append("Add an About/Team page with real team member bios and credentials")
+    if eeat.get("has_contact_info"): eeat_score += 15; eeat_findings.append("Contact information: Visible on page")
+    else: eeat_findings.append("Contact info: NOT VISIBLE"); eeat_recs.append("Display phone number and email address prominently on the page")
+    if eeat.get("has_social_proof"): eeat_score += 15; eeat_findings.append("Social proof (testimonials/reviews): Detected")
+    else: eeat_findings.append("Social proof: Not detected"); eeat_recs.append("Add customer testimonials, reviews, or case studies to build trust")
+    if eeat.get("has_credentials"): eeat_score += 15; eeat_findings.append("Credentials/Certifications: Referenced")
+    else: eeat_findings.append("Credentials: Not found"); eeat_recs.append("Display certifications, awards, partnerships, or BBB accreditation")
+    eeat_score = min(eeat_score, 100)
+
+    # Build sections (original 8 + new 8 = 16 total)
     sections = [
-        {"name": "Technical SEO", "score": tech_score, "icon": "🔧", "findings": tech_findings, "recommendations": tech_recs or ["Technical SEO looks solid — maintain current setup"]},
-        {"name": "On-Page SEO", "score": onpage_score, "icon": "📄", "findings": onpage_findings, "recommendations": onpage_recs or ["On-page optimization is in good shape"]},
-        {"name": "Content Quality", "score": content_score, "icon": "📝", "findings": content_findings, "recommendations": content_recs or ["Content is well-structured"]},
-        {"name": "Schema & Entity SEO", "score": schema_score, "icon": "🏷️", "findings": schema_findings, "recommendations": schema_recs or ["Structured data is well-implemented"]},
-        {"name": "Social Media SEO", "score": social_score, "icon": "📱", "findings": social_findings, "recommendations": social_recs or ["Social sharing tags are set up correctly"]},
-        {"name": "Security & SSL", "score": sec_score, "icon": "🔒", "findings": sec_findings, "recommendations": sec_recs or ["Security is well-configured"]},
-        {"name": "Performance", "score": perf_score, "icon": "⚡", "findings": perf_findings, "recommendations": perf_recs or ["Performance is good"]},
-        {"name": "Mobile Readiness", "score": mobile_score, "icon": "📲", "findings": mobile_findings, "recommendations": mobile_recs or ["Mobile optimization is solid"]},
+        {"name": "Technical SEO", "score": tech_score, "icon": "🔧", "findings": tech_findings, "recommendations": tech_recs or ["Technical SEO looks solid — maintain current setup"], "audit_type": "ai_automated"},
+        {"name": "On-Page SEO", "score": onpage_score, "icon": "📄", "findings": onpage_findings, "recommendations": onpage_recs or ["On-page optimization is in good shape"], "audit_type": "ai_automated"},
+        {"name": "Content Quality", "score": content_score, "icon": "📝", "findings": content_findings, "recommendations": content_recs or ["Content is well-structured"], "audit_type": "ai_automated"},
+        {"name": "Schema & JSON-LD", "score": schema_score, "icon": "🏷️", "findings": schema_findings, "recommendations": schema_recs or ["Structured data is well-implemented"], "audit_type": "ai_automated"},
+        {"name": "Social Media SEO", "score": social_score, "icon": "📱", "findings": social_findings, "recommendations": social_recs or ["Social sharing tags are set up correctly"], "audit_type": "ai_automated"},
+        {"name": "Security & SSL", "score": sec_score, "icon": "🔒", "findings": sec_findings, "recommendations": sec_recs or ["Security is well-configured"], "audit_type": "ai_automated"},
+        {"name": "Performance", "score": perf_score, "icon": "⚡", "findings": perf_findings, "recommendations": perf_recs or ["Performance is good"], "audit_type": "ai_automated"},
+        {"name": "Mobile Readiness", "score": mobile_score, "icon": "📲", "findings": mobile_findings, "recommendations": mobile_recs or ["Mobile optimization is solid"], "audit_type": "ai_automated"},
+        {"name": "Core Web Vitals (LCP/INP/CLS)", "score": cwv_score, "icon": "🎯", "findings": cwv_findings, "recommendations": cwv_recs or ["Core Web Vitals indicators look good"], "audit_type": "ai_automated"},
+        {"name": "GEO / AI Crawler Access", "score": geo_score, "icon": "🤖", "findings": geo_findings, "recommendations": geo_recs or ["AI crawler access is properly configured"], "audit_type": "ai_automated"},
+        {"name": "Image Alt Text & WebP Audit", "score": img_audit_score, "icon": "🖼️", "findings": img_findings, "recommendations": img_recs or ["Image optimization is solid"], "audit_type": "ai_automated"},
+        {"name": "XML Sitemap Validation", "score": sitemap_score, "icon": "🗺️", "findings": sitemap_findings, "recommendations": sitemap_recs or ["Sitemap is properly configured"], "audit_type": "ai_automated"},
+        {"name": "Robots.txt Check", "score": robots_score, "icon": "🤖", "findings": robots_findings, "recommendations": robots_recs or ["Robots.txt is well-configured"], "audit_type": "ai_automated"},
+        {"name": "Internal Linking Depth", "score": linking_score, "icon": "🔗", "findings": linking_findings, "recommendations": linking_recs or ["Internal linking structure is solid"], "audit_type": "ai_automated"},
+        {"name": "Canonical Mismatch Detection", "score": canon_score, "icon": "🔍", "findings": canon_findings, "recommendations": canon_recs or ["Canonical URLs are properly set"], "audit_type": "ai_automated"},
+        {"name": "E-E-A-T Author Signals", "score": eeat_score, "icon": "👤", "findings": eeat_findings, "recommendations": eeat_recs or ["E-E-A-T signals are strong"], "audit_type": "ai_automated"},
     ]
 
     overall = round(sum(s["score"] for s in sections) / len(sections))
     grade = "A+" if overall >= 90 else "A" if overall >= 80 else "B" if overall >= 70 else "C" if overall >= 55 else "D" if overall >= 40 else "F"
 
-    # Build top 3 priorities from lowest-scoring sections
+    # Build top 5 priorities from lowest-scoring sections
     sorted_secs = sorted(sections, key=lambda x: x["score"])
     priorities = []
-    for s in sorted_secs[:3]:
+    for s in sorted_secs[:5]:
         if s["recommendations"]:
             priorities.append(f"{s['icon']} {s['name']} (Score: {s['score']}/100) — {s['recommendations'][0]}")
+
+    # Separate AI automated vs Human required tasks
+    ai_tasks = []
+    human_tasks = []
+    for s in sections:
+        for rec in s.get("recommendations", []):
+            if any(kw in rec.lower() for kw in ["add a", "add your", "create a", "add <", "display", "add an", "add descriptive", "convert images"]):
+                human_tasks.append({"section": s["name"], "task": rec, "reason": "Requires content creation, design decisions, or access to business assets"})
+            else:
+                ai_tasks.append({"section": s["name"], "task": rec, "reason": "Can be automated with AI tools or scripts"})
+
+    # Human-required tasks that need login credentials
+    credential_tasks = [
+        {"task": "Google Search Console — Submit sitemap, monitor indexing, check crawl errors", "credential": "GSC OAuth or API key", "how": "https://search.google.com/search-console"},
+        {"task": "Google Analytics — Install GA4, track Core Web Vitals in real-time", "credential": "GA4 Measurement ID", "how": "https://analytics.google.com"},
+        {"task": "PageSpeed Insights API — Get real Lighthouse CWV scores (LCP, INP, CLS)", "credential": "Google API key (free)", "how": "https://developers.google.com/speed/docs/insights/v5/get-started"},
+        {"task": "Backlink Profile Analysis — Full backlink audit with DA/PA metrics", "credential": "Ahrefs/SEMrush/Moz API key ($99-199/mo)", "how": "Ahrefs: https://ahrefs.com | SEMrush: https://semrush.com"},
+        {"task": "Knowledge Graph / Entity SEO — Verify Google Knowledge Panel", "credential": "Google Knowledge Graph API key (free)", "how": "https://developers.google.com/knowledge-graph"},
+        {"task": "Google Business Profile — Optimize NAP, categories, reviews", "credential": "GBP account login", "how": "https://business.google.com"},
+    ]
 
     return {
         "business_name": business_name,
@@ -2951,10 +3277,14 @@ def _build_audit_from_crawl(crawl, business_name, industry, city, url):
         "overall_score": overall,
         "grade": grade,
         "sections": sections,
-        "top_3_priorities": priorities,
+        "top_priorities": priorities,
+        "ai_automated_tasks": ai_tasks,
+        "human_required_tasks": human_tasks,
+        "credential_required_tasks": credential_tasks,
         "mode": "live_crawl",
         "provider": "real_crawler",
-        "note": f"REAL AUDIT — This report is based on a live crawl of {url} performed on {datetime.now().strftime('%B %d, %Y at %H:%M UTC')}. All data is from actual website analysis, not estimates."
+        "total_checks": len(sections),
+        "note": f"REAL AUDIT — This report is based on a live crawl of {url} performed on {datetime.now().strftime('%B %d, %Y at %H:%M UTC')}. All data is from actual website analysis across {len(sections)} audit categories."
     }
 
 
