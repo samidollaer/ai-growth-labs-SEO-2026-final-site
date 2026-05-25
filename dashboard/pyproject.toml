@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "AI Growth Labs - Agency Operating System Dashboard"
 requires-python = ">=3.10"
 dependencies = [
-    "fastapi==0.115.0",
+    "fastapi[standard]==0.115.0",
     "uvicorn[standard]==0.30.0",
     "python-jose[cryptography]==3.3.0",
     "passlib[bcrypt]==1.7.4",
@@ -23,4 +23,7 @@ dependencies = [
     "stripe>=9.0.0",
     "twilio>=9.0.0",
     "apscheduler>=3.10.0",
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.0.0",
 ]

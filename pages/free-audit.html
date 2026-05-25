@@ -497,31 +497,10 @@
   <script src="../js/main.js"></script>
   <script src="../js/form-validation.js"></script>
   <script>
-    // Backend API URL — change this to your production domain
+    // Backend API URL — Fly.io permanent deployment
     const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:8000'
-      : 'https://a3fce9995779-tunnel-obhlq5l5.devinapps.com';
-    const TUNNEL_AUTH = 'Basic ' + btoa('user:5dfe2494e43dd9ea3b068a0861a8499b');
-
-    // XHR-based fetch replacement to avoid credential-in-URL blocking
-    function xhrFetch(url, opts) {
-      return new Promise(function(resolve, reject) {
-        var xhr = new XMLHttpRequest();
-        xhr.open((opts && opts.method) || 'GET', url, true);
-        // Add tunnel auth header if calling backend
-        if (url.indexOf('devinapps.com') !== -1) {
-          xhr.setRequestHeader('Authorization', TUNNEL_AUTH);
-        }
-        if (opts && opts.headers) {
-          Object.keys(opts.headers).forEach(function(k) { xhr.setRequestHeader(k, opts.headers[k]); });
-        }
-        xhr.onload = function() {
-          resolve({ ok: xhr.status >= 200 && xhr.status < 300, status: xhr.status, json: function() { return Promise.resolve(JSON.parse(xhr.responseText)); }, text: function() { return Promise.resolve(xhr.responseText); } });
-        };
-        xhr.onerror = function() { reject(new TypeError('Network error')); };
-        xhr.send(opts && opts.body || null);
-      });
-    }
+      : 'https://ai-growth-labs-os-jddtnvip.fly.dev';
 
     async function runAudit(e) {
       e.preventDefault();
@@ -578,7 +557,7 @@
       ];
 
       try {
-        const resp = await xhrFetch(API_URL + '/api/public/free-audit', {
+        const resp = await fetch(API_URL + '/api/public/free-audit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
